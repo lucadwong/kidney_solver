@@ -22,6 +22,11 @@ history = History()
 people = {}
 count = 0
 
+# graphs of the patient donor pairs
+# dictionary of adjacency pairs more info can be found in generate_graph
+graph = {}
+graph_ndd = {}
+
 def check_waiting_operations():
     successful = []
     unsuccessful = []
@@ -60,8 +65,9 @@ def check_cycles_chains():
 def generate_graph(input_file, round):
 
     # graph[vertex] = [list of vertices that edges outward extend to]
-    graph = {}
-    graph_ndd = {}
+    
+    global graph
+    global graph_ndd
 
     data = {}
     altru_num = 0
