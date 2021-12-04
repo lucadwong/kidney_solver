@@ -29,6 +29,7 @@ count = 0
 # dictionary of adjacency pairs more info can be found in generate_graph
 graph = {}
 graph_ndd = {}
+edges = {}
 
 def check_waiting_operations(round):
     successful = []
@@ -46,6 +47,8 @@ def check_waiting_operations(round):
         for due_date, c in cycles:
             if due_date == round:
                 cycles_to_check.append(c)
+
+    print(edges.keys())
 
     # do some things to figure out which were successful and which were not successful
 
@@ -141,7 +144,7 @@ def generate_graph(input_file, round):
     
     graph = {}
     graph_ndd = {}
-    edges = {}
+    # edges = {}
 
     data = {}
     altru_num = 0
@@ -181,12 +184,12 @@ def generate_graph(input_file, round):
             if data[i]["donor"] == "O" or data[i]["donor"] in data[j]["patient"]:
                 if data[i]["patient"] != 'None':
                     graph[i].append(j)
-                    edges[(i, j)] = generate_failure_prob(True)
+                    edges[(int(i), int(j))] = generate_failure_prob(True)
                     num_edges += 1
 
                 if data[i]["patient"] == 'None':
                     graph_ndd[i].append(j)
-                    edges[(i, j)] = generate_failure_prob(True)
+                    edges[(int(i), int(j))] = generate_failure_prob(True)
                     num_edges_ndd += 1
 
     f = open(f'graphs/graph{round}.input', "w")
@@ -353,10 +356,11 @@ if __name__=="__main__":
         awaiting_operations["chains"].append(chains)
 
         # add success
-        history.add_round(cycles, chains, awaiting_operations, deaths, successful, active_pairs)
+        history.add_round(cycles, chains, awaiting_operations, deaths, successful, unsuccessful, active_pairs)
 
     print("Total Transplants: " + str(transplants))
     print("Total Deaths: " + str(total_deaths))
+    print("Failed Transplants: ",history.unsuccessful)
 
         
 

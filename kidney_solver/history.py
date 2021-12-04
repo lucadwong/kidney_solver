@@ -27,14 +27,16 @@ class History:
         self.awaiting_operations = []
         self.deaths = []
         self.successful = []
+        self.unsuccessful = []
         self.active_pairs = []
 
-    def add_round(self, cycles, chains, ao, deaths,successful,active_pairs):
+    def add_round(self, cycles, chains, ao, deaths,successful,unsuccessful,active_pairs):
         self.cycles.append(copy.deepcopy(cycles))
         self.chains.append(copy.deepcopy(chains))
         self.awaiting_operations.append(copy.deepcopy(ao))
         self.deaths.append(copy.deepcopy(deaths))
         self.successful.append(copy.deepcopy(successful))
+        self.unsuccessful.append(copy.deepcopy(unsuccessful))
         self.active_pairs.append(copy.deepcopy(active_pairs))
 
     def last_round(self):

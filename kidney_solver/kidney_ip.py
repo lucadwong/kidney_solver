@@ -111,7 +111,8 @@ class OptSolution(object):
             cs[i] = cs[i][min_index_pos:] + cs[i][:min_index_pos]
         # Sort the cycles
         cs.sort()
-        ch = [self.chains[i].vtx_indices for i in range(len(self.chains))]
+        print(self.chains[0])
+        ch = [[self.chains[i].ndd_index] + self.chains[i].vtx_indices for i in range(len(self.chains))]
         return cs,ch
 
 
