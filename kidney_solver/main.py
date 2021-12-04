@@ -5,6 +5,7 @@ from csv import DictReader
 import random 
 import numpy as np
 from time import sleep
+
 # wait time
 wait_time = 4
 
@@ -48,9 +49,31 @@ def check_waiting_operations(round):
 
     # do some things to figure out which were successful and which were not successful
 
+    for cycle in cycles_to_check:
+        length = len(cycle)
+        for i in range(length-1):
+            if random.random() < edges[(cycle[i], cycle[i+1])]:
+                unsuccessful.extend(cycle)
+            if random.random() < edges[(cycle[length - 1], cycle[0])]:
+                unsuccessful.extend(cycle)
+        successful.extend(cycle)
+
+    # CHECK THIS – IT MIGHT BE WRONG
+    for chain in chains_to_check:
+        length = len(chain)
+        for i in range(length-1):
+            if random.random() < edges[(chain[i], chain[i+1])]:
+                successful.append(chain[i+1])
+            else:
+                unsuccessful.extend(chain[i+1: ])
+
     # remove the successful from the active pairs
 
+    active_pairs.difference_update(set(successful))
+
     # add the unsuccessful back to the active set
+
+    active_pairs.update(set(unsuccessful))
 
     return successful, unsuccessful
 
@@ -78,19 +101,34 @@ def check_cycles_chains():
     chains = []
     on_cycles = True
     li = []
-    myfile = open('cycles_chains.txt', 'r')
-    for line in myfile:
-        if line == 'chains':
-            on_cycles = False
-        if line == '':
-            cycles.append(li) if on_cycles else chains.append(li)
-            li = []
-        try:
-            vtx = int(line)
-            li.append(vtx)
-        except:
-            pass
-    return cycles, chains
+    with open('cycles_chains.txt', 'r') as f:
+        myfile = f.read().splitlines()
+        for line in myfile:
+            if line == 'chains':
+                on_cycles = False
+            if line == '':
+                cycles.append(li) if on_cycles else chains.append(li)
+                li = []
+            try:
+                vtx = int(line)
+                li.append(vtx)
+            except:
+                pass
+
+        print(cycles, chains)
+        return cycles, chains
+
+# generates failure probabilities for each edge
+def generate_failure_prob(constant):
+    
+    if constant:
+        return 0.7
+    else:
+        failure = np.random.normal(0.7, 0.1)
+        while failure < 0 or failure > 1:
+            failure = np.random.normal(0.7, 0.1)
+        
+        return failure
 
 def generate_graph(input_file, round):
 
@@ -98,9 +136,11 @@ def generate_graph(input_file, round):
     
     global graph
     global graph_ndd
+    global edges
     
     graph = {}
     graph_ndd = {}
+    edges = {}
 
     data = {}
     altru_num = 0
@@ -139,10 +179,12 @@ def generate_graph(input_file, round):
             if data[i]["donor"] == "O" or data[i]["donor"] in data[j]["patient"]:
                 if data[i]["patient"] != 'None':
                     graph[i].append(j)
+                    edges[(i, j)] = generate_failure_prob(True)
                     num_edges += 1
 
                 if data[i]["patient"] == 'None':
                     graph_ndd[i].append(j)
+                    edges[(i, j)] = generate_failure_prob(True)
                     num_edges_ndd += 1
 
     f = open(f'graphs/graph{round}.input', "w")
@@ -177,7 +219,7 @@ def generate_graph(input_file, round):
     return f'graphs/graph{round}.input', f'graphs/graph{round}.ndds'
 
 # def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, count=0, people={}, p_die_mu=0.3, p_die_sd=0.15, p_die_update = 1.1):
-def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, p_die_mu=0.3, p_die_sd=0.15, p_die_update = 1.1):
+def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, p_die_mu=0.2, p_die_sd=0.1, p_die_update = 1.04):
     global people
     global count
     global active_pairs
@@ -266,8 +308,12 @@ def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, p_d
 
 if __name__=="__main__":
     #create an initial file
+
+    # relevant statistics
+    transplants = 0
+    total_deaths = 0
     
-    num_rounds = 3
+    num_rounds = 10
     for round in range(num_rounds):
         
         # iterate through groups waiting operations to check for failures
@@ -275,6 +321,10 @@ if __name__=="__main__":
         
         # finds deaths
         deaths = check_deaths()
+
+        # adds deaths and transplants
+        total_deaths += len(deaths)
+        transplants += len(successful)
 
         s1 = set(unsuccessful)
         s2 = set(deaths)
@@ -299,6 +349,9 @@ if __name__=="__main__":
 
         # add success
         history.add_round(cycles, chains, awaiting_operations, deaths, successful, active_pairs)
+
+    print("Total Transplants: " + str(transplants))
+    print("Total Deaths: " + str(total_deaths))
 
         
 

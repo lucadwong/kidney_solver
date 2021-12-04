@@ -119,7 +119,7 @@ def start():
             for el in c:
                 print(el, file=f)
             print('', file=f)
-        print('chain', file=f)
+        print('chains', file=f)
         for c in chains:
             for el in c:
                 print(el, file=f)
