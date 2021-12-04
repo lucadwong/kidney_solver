@@ -5,6 +5,8 @@ from csv import DictReader
 import random 
 import numpy as np
 from time import sleep
+# wait time
+wait_time = 4
 
 # list of patients in limbo "cycles":[[],[],[]], "chains":[[],[],[]]
 awaiting_operations = {"cycles": [],"chains": []}
@@ -27,9 +29,22 @@ count = 0
 graph = {}
 graph_ndd = {}
 
-def check_waiting_operations():
+def check_waiting_operations(round):
     successful = []
     unsuccessful = []
+
+    chains_to_check = []
+    cycles_to_check = []
+    # check which chains and cycles are due for operation
+    for chains in awaiting_operations["chains"]:
+        for due_date, c in chains:
+            if due_date == round:
+                chains_to_check.append(c)
+    
+    for cycles in awaiting_operations["cycles"]:
+        for due_date, c in cycles:
+            if due_date == round:
+                cycles_to_check.append(c)
 
     # do some things to figure out which were successful and which were not successful
 
@@ -41,6 +56,21 @@ def check_waiting_operations():
 
 def check_deaths():
     deaths = []
+    #check patients active in the pool
+    for id in active_pairs:
+        if random.random() < float(people[id]["p_die"]):
+            deaths.append(id)
+    #check patients who are inactive and awaiting operation
+    for chains in awaiting_operations["chains"]:
+        for _, chain in chains:
+            for id in chain:
+                if random.random() < float(people[id]["p_die"]):
+                    deaths.append(id)
+    for cycles in awaiting_operations["cycles"]:
+        for _, cycle in cycles:
+            for id in cycle:
+                if random.random() < float(people[id]["p_die"]):
+                    deaths.append(id)
     return deaths
 
 def check_cycles_chains():
@@ -68,6 +98,9 @@ def generate_graph(input_file, round):
     
     global graph
     global graph_ndd
+    
+    graph = {}
+    graph_ndd = {}
 
     data = {}
     altru_num = 0
@@ -99,16 +132,16 @@ def generate_graph(input_file, round):
 
     for i in data:
         for j in data:
-
+            
             if i == j:
                 continue
 
             if data[i]["donor"] == "O" or data[i]["donor"] in data[j]["patient"]:
-                if data[i]["patient"] != None:
+                if data[i]["patient"] != 'None':
                     graph[i].append(j)
                     num_edges += 1
 
-                if data[i]["patient"] == None:
+                if data[i]["patient"] == 'None':
                     graph_ndd[i].append(j)
                     num_edges_ndd += 1
 
@@ -135,7 +168,7 @@ def generate_graph(input_file, round):
     for i in graph_ndd: 
 
         for j in graph_ndd[i]:
-            f.write("\t".join([str(i), str(j)]))
+            f.write("\t".join([str(i), str(j), str(weight)]))
             f.write("\n")
 
     f.write("\t".join([str(-1), str(-1)]))
@@ -147,6 +180,7 @@ def generate_graph(input_file, round):
 def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, p_die_mu=0.3, p_die_sd=0.15, p_die_update = 1.1):
     global people
     global count
+    global active_pairs
     current_data = {}
 
     if round != 0:
@@ -165,11 +199,13 @@ def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, p_d
 
     # delete people from list
     for vertex in remove_list:
-        del(current_data, vertex)
+        del current_data[str(vertex)]
+        active_pairs.remove(vertex)
 
     # add people back to list
     for vertex in add_list:
         current_data[vertex] = people[vertex]
+        active_pairs.add(vertex)
 
     # add new people
     for i in range(add_num):
@@ -193,6 +229,7 @@ def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, p_d
             "donor": donor,
             "p_die": p_die
         }
+        active_pairs.add(count)
 
         current_data[count] = people[count]
         count += 1
@@ -208,6 +245,8 @@ def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, p_d
             "donor": donor,
             "p_die": "0.0"
         }
+        
+        active_pairs.add(count)
 
         current_data[count] = people[count]
         count += 1
@@ -228,11 +267,11 @@ def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, p_d
 if __name__=="__main__":
     #create an initial file
     
-    num_rounds = 2
+    num_rounds = 3
     for round in range(num_rounds):
         
         # iterate through groups waiting operations to check for failures
-        successful, unsuccessful = check_waiting_operations()
+        successful, unsuccessful = check_waiting_operations(round)
         
         # finds deaths
         deaths = check_deaths()
@@ -252,11 +291,14 @@ if __name__=="__main__":
         
         # cycles, chains = kidney_solver.run_round(i)
         cycles, chains = check_cycles_chains()
+        cycles = [(round + wait_time, c) for c in cycles]
+        chains = [(round + wait_time, c) for c in chains]
+
         awaiting_operations["cycles"].append(cycles)
         awaiting_operations["chains"].append(chains)
 
         # add success
-        history.add_round(cycles, chains, awaiting_operations, deaths, successful)
+        history.add_round(cycles, chains, awaiting_operations, deaths, successful, active_pairs)
 
         
 
