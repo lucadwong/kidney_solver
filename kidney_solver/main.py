@@ -62,6 +62,7 @@ def check_waiting_operations(round):
     for chain in chains_to_check:
         length = len(chain)
         for i in range(length-1):
+            print(i)
             if random.random() < edges[(chain[i], chain[i+1])]:
                 successful.append(chain[i+1])
             else:
@@ -159,6 +160,7 @@ def generate_graph(input_file, round):
 
             if row["patient"] == "None":
                 altru_num += 1
+                print(row["index"])
 
             else:
                 pair_num +=1
@@ -205,7 +207,7 @@ def generate_graph(input_file, round):
     f.close()
 
     f = open(f'graphs/graph{round}.ndds', "w")
-    f.write("\t".join([str(altru_num), str(num_edges_ndd)]))
+    f.write("\t".join([str(len(people)), str(num_edges_ndd)]))
     f.write("\n")
 
     for i in graph_ndd: 
@@ -243,13 +245,14 @@ def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, p_d
 
     # delete people from list
     for vertex in remove_list:
-        del current_data[str(vertex)]
-        active_pairs.remove(vertex)
+        try:
+            del current_data[str(vertex)]
+        except:
+            print("oops")
 
     # add people back to list
     for vertex in add_list:
         current_data[vertex] = people[vertex]
-        active_pairs.add(vertex)
 
     # add new people
     for i in range(add_num):
