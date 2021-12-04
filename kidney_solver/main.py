@@ -201,6 +201,7 @@ def generate_graph(input_file, round):
             f.write("\n")
 
     f.write("\t".join([str(-1), str(-1), str(-1)]))
+    f.write("\n")
     f.close()
 
     f = open(f'graphs/graph{round}.ndds', "w")
@@ -214,6 +215,7 @@ def generate_graph(input_file, round):
             f.write("\n")
 
     f.write("\t".join([str(-1), str(-1)]))
+    f.write("\n")
     f.close()
 
     return f'graphs/graph{round}.input', f'graphs/graph{round}.ndds'

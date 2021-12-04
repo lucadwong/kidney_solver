@@ -7,7 +7,6 @@ import time
 import sys
 import os
 
-
 from . import kidney_digraph
 from . import kidney_ip
 from . import kidney_utils
@@ -84,7 +83,7 @@ def start():
         # print("input lines", input_lines)
         # ndd_lines = input_lines[n_digraph_edges + 2:]
         # print("ndd", ndd_lines)
-        ndd_lines = input_lines
+        ndd_lines = input_lines[n_digraph_edges + 2:]
         altruists = kidney_ndds.read_ndds(ndd_lines, d)
     else:
         altruists = []
