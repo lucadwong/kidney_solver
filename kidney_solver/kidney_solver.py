@@ -6,6 +6,7 @@ import argparse
 import time
 import sys
 
+
 from . import kidney_digraph
 from . import kidney_ip
 from . import kidney_utils
@@ -104,8 +105,22 @@ def start():
     print(("solver_status: {}".format(opt_solution.ip_model.status)))
     print(("total_score: {}".format(opt_solution.total_score)))
     opt_solution.display()
-    return opt_solution.return_matches()
-#     print(opt_solution.return_matches())
+
+    # creating textfile to store intermediate data of matches made
+    cycles, chains = opt_solution.return_matches()
+
+    with open('cycles_chains.txt', 'w') as f:
+        print('cycles', file=f)
+        for c in cycles:
+            for el in c:
+                print(el, file=f)
+            print("", file=f)
+        print('chain', file=f)
+        for c in chains:
+            for el in c:
+                print(el, file=f)
+            print("",  file=f)
+    
 
 if __name__=="__main__":
     start()
