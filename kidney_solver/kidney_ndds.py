@@ -41,7 +41,7 @@ def read_ndds(lines, digraph):
     """Reads NDDs from an array of strings in the .ndd format."""
 
     ndds = []
-    print([int(x) for x in lines[0].split()])
+    # print([int(x) for x in lines[0].split()])
     ndd_count, edge_count = [int(x) for x in lines[0].split()]
     ndds = [Ndd() for _ in range(ndd_count)]
 

@@ -228,9 +228,11 @@ def read_digraph(lines):
         score = float(tokens[2])
             
         digraph.add_edge(score, digraph.vs[src_id], digraph.vs[tgt_id])
-
-    if lines[edge_count+1].split()[0] != "-1" or len(lines) < edge_count+2:
-        raise KidneyReadException("Incorrect edge count")
+    # print(len(lines) , edge_count+2)
+    # print(lines)
+    # print(lines[edge_count+1])
+    # if lines[edge_count+1].split()[0] != "-1" or len(lines) < edge_count+2:
+    #     raise KidneyReadException("Incorrect edge count")
 
     return digraph
 

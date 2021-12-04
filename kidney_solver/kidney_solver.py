@@ -81,7 +81,10 @@ def start():
     d = kidney_digraph.read_digraph(digraph_lines)
 
     if len(input_lines) > len(digraph_lines):
-        ndd_lines = input_lines[n_digraph_edges + 2:]
+        # print("input lines", input_lines)
+        # ndd_lines = input_lines[n_digraph_edges + 2:]
+        # print("ndd", ndd_lines)
+        ndd_lines = input_lines
         altruists = kidney_ndds.read_ndds(ndd_lines, d)
     else:
         altruists = []
