@@ -5,6 +5,7 @@ IP formulations for kidney exchange, including PICEF
 import argparse
 import time
 import sys
+import os
 
 
 from . import kidney_digraph
@@ -114,12 +115,13 @@ def start():
         for c in cycles:
             for el in c:
                 print(el, file=f)
-            print("", file=f)
+            print('', file=f)
         print('chain', file=f)
         for c in chains:
             for el in c:
                 print(el, file=f)
-            print("",  file=f)
+            print('',  file=f)
+        print('end',  file=f)
     
 
 if __name__=="__main__":
