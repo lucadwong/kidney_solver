@@ -41,6 +41,7 @@ def read_ndds(lines, digraph):
     """Reads NDDs from an array of strings in the .ndd format."""
 
     ndds = []
+    print([int(x) for x in lines[0].split()])
     ndd_count, edge_count = [int(x) for x in lines[0].split()]
     ndds = [Ndd() for _ in range(ndd_count)]
 
@@ -64,6 +65,7 @@ def read_ndds(lines, digraph):
         edge_exists[src_id][tgt_id] = True
 
     if lines[edge_count+1].split()[0] != "-1" or len(lines) < edge_count+2:
+        # print(len(lines), edge_count+2)
         raise KidneyReadException("Incorrect edge count")
 
     return ndds

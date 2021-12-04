@@ -38,6 +38,25 @@ def check_deaths():
     deaths = []
     return deaths
 
+def check_cycles_chains():
+    cycles = []
+    chains = []
+    on_cycles = True
+    li = []
+    myfile = open('cycles_chains.txt', 'r')
+    for line in myfile:
+        if line == 'chains':
+            on_cycles = False
+        if line == '':
+            cycles.append(li) if on_cycles else chains.append(li)
+            li = []
+        try:
+            vtx = int(line)
+            li.append(vtx)
+        except:
+            pass
+    return cycles, chains
+
 def generate_graph(input_file, round):
 
     # graph[vertex] = [list of vertices that edges outward extend to]
@@ -79,16 +98,16 @@ def generate_graph(input_file, round):
                 continue
 
             if data[i]["donor"] == "O" or data[i]["donor"] in data[j]["patient"]:
-                if data[i]["patient"] != "None":
+                if data[i]["patient"] != None:
                     graph[i].append(j)
                     num_edges += 1
 
-                if data[i]["patient"] == "None":
+                if data[i]["patient"] == None:
                     graph_ndd[i].append(j)
                     num_edges_ndd += 1
 
     f = open(f'graphs/graph{round}.input', "w")
-    f.write("\t".join([str(pair_num), str(num_edges)]))
+    f.write("\t".join([str(len(people)), str(num_edges)]))
     f.write("\n")
 
     for i in graph: 
@@ -108,30 +127,35 @@ def generate_graph(input_file, round):
     f.write("\n")
 
     for i in graph_ndd: 
-        
-        # to modify the weights
-        weight = 1
 
         for j in graph_ndd[i]:
-            f.write("\t".join([str(i), str(j), str(weight)]))
+            f.write("\t".join([str(i), str(j)]))
             f.write("\n")
 
-    f.write("\t".join([str(-1), str(-1), str(-1)]))
+    f.write("\t".join([str(-1), str(-1)]))
     f.close()
 
     return f'graphs/graph{round}.input', f'graphs/graph{round}.ndds'
 
-def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, count=0, people={}, p_die_mu=0.3, p_die_sd=0.15, p_die_update = 1.1):
+# def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, count=0, people={}, p_die_mu=0.3, p_die_sd=0.15, p_die_update = 1.1):
+def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, p_die_mu=0.3, p_die_sd=0.15, p_die_update = 1.1):
+    global people
+    global count
     current_data = {}
 
-    if round:
-        lines = open(f'./working{round - 1}.csv', "r").readlines()
-        for line in lines:
-            idx, data = line.split(",")[0], line.split(",")[1:]
-            current_data[idx] = data
-
+    if round != 0:
+        csvfile = open(f'./working/working{round - 1}.csv', "r")
+        reader = DictReader(csvfile)
+        
+        for row in reader:
+            current_data[row["index"]] = {
+                "index": row["index"],
+                "patient": row["patient"],
+                "donor": row["donor"],
+                "p_die": float(row["p_die"])
+            }
             # change probability person dies each round
-            current_data[idx]["p_die"] *= p_die_update
+            current_data[row["index"]]["p_die"] *= p_die_update
 
     # delete people from list
     for vertex in remove_list:
@@ -211,11 +235,10 @@ if __name__=="__main__":
         s2 = set(deaths)
         add_list = list(s1.difference(s2))      
         # there exist more params for generate_input 
-        working_file = generate_input(10, 1, remove_list=deaths, add_list=add_list, round=0)
+        working_file = generate_input(10, 1, remove_list=deaths, add_list=add_list, round=round)
 
         # input round number below
         inpt,nnds = generate_graph(working_file, round)
-        
         
         # run round
         os.system("cat %s %s | python3 -m kidney_solver.kidney_solver 3 100 %s"
