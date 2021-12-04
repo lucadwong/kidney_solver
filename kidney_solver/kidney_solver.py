@@ -104,6 +104,8 @@ def start():
     print(("solver_status: {}".format(opt_solution.ip_model.status)))
     print(("total_score: {}".format(opt_solution.total_score)))
     opt_solution.display()
+    return opt_solution.return_matches()
+#     print(opt_solution.return_matches())
 
 if __name__=="__main__":
     start()

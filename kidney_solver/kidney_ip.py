@@ -103,6 +103,18 @@ class OptSolution(object):
         return OptSolution(self.ip_model, relabelled_cycles, relabelled_chains,
                            new_digraph, self.edge_success_prob)
 
+    def return_matches(self):
+        cs = [[v.id for v in c] for c in self.cycles]
+        # Put the lowest-indexed vertex at the start of each cycle
+        for i in range(len(cs)):
+            min_index_pos = cs[i].index(min(cs[i]))
+            cs[i] = cs[i][min_index_pos:] + cs[i][:min_index_pos]
+        # Sort the cycles
+        cs.sort()
+        ch = [self.chains[i].vtx_indices for i in range(len(self.chains))]
+        return cs,ch
+
+
 def optimise(model, cfg):
     if cfg.lp_file:
         model.update()
