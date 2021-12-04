@@ -37,7 +37,7 @@ def check_deaths():
     deaths = []
     return deaths
 
-def generate_graph(input_file):
+def generate_graph(input_file, round):
 
     # graph[vertex] = [list of vertices that edges outward extend to]
     graph = {}
@@ -86,7 +86,7 @@ def generate_graph(input_file):
                     graph_ndd[i].append(j)
                     num_edges_ndd += 1
 
-    f = open("graph.input", "w")
+    f = open(f'graphs/graph{round}.input', "w")
     f.write("\t".join([str(pair_num), str(num_edges)]))
     f.write("\n")
 
@@ -102,7 +102,7 @@ def generate_graph(input_file):
     f.write("\t".join([str(-1), str(-1), str(-1)]))
     f.close()
 
-    f = open("graph.ndds", "w")
+    f = open(f'graphs/graph{round}.ndds', "w")
     f.write("\t".join([str(altru_num), str(num_edges_ndd)]))
     f.write("\n")
 
@@ -117,6 +117,8 @@ def generate_graph(input_file):
 
     f.write("\t".join([str(-1), str(-1), str(-1)]))
     f.close()
+
+    return f'graphs/graph{round}.input', f'graphs/graph{round}.ndds'
 
 def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, count=0, people={}, p_die_mu=0.3, p_die_sd=0.15, p_die_update = 1.1):
 
@@ -180,7 +182,7 @@ def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, cou
         current_data[count] = people[count]
         count += 1
 
-    file = open(f'./working{round}.csv', "w")
+    file = open(f'./working/working{round}.csv', "w")
     file.write("index,patient,donor,p_die")
     file.write("\n")
 
@@ -189,7 +191,7 @@ def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, cou
         file.write(",".join(lst))
         file.write("\n")
     
-    return(f'./working{round}.csv')
+    return(f'./working/working{round}.csv')
 
 
 
@@ -212,9 +214,11 @@ if __name__=="__main__":
         history.add_round(cycles, chains, awaiting_operations, deaths, successful)
 
         """
-        # there exist more params for generate_input
+        # there exist more params for generate_input 
         working_file = generate_input(10, 1)
-        generate_graph(working_file)
+
+        # input round number below
+        generate_graph(working_file, round)
         """
 
 
