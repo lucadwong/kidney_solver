@@ -4,11 +4,12 @@ from . import kidney_solver
 from .history import History
 from csv import DictReader
 import random
+import statistics
 import numpy as np
 from time import sleep
 
 # wait time before processing transplants
-wait_time = 4
+wait_time = 1
 
 # keeps track of all operations
 operations = {"cycles": {}, "chains": {}, "people_waiting": set()}
@@ -212,6 +213,7 @@ def generate_graph(input_file, round):
         weight = 1
 
         for j in graph[i]:
+            # weight = data[j]["p_die"]
             f.write("\t".join([str(i), str(j), str(weight)]))
             f.write("\n")
 
@@ -225,7 +227,10 @@ def generate_graph(input_file, round):
 
     for i in graph_ndd: 
 
+        weight = 1
+
         for j in graph_ndd[i]:
+            # weight = data[j]["p_die"]
             f.write("\t".join([str(i), str(j), str(weight)]))
             f.write("\n")
 
@@ -236,7 +241,7 @@ def generate_graph(input_file, round):
     return f'graphs/graph{round}.input', f'graphs/graph{round}.ndds'
 
 # def generate_input(add_num, altru_num, add_list=[], round=0, count=0, people={}, p_die_mu=0.3, p_die_sd=0.15, p_die_update = 1.1):
-def generate_input(add_num, altru_num, add_list=[], round=0, p_die_mu=0.02, p_die_sd=0.01, p_die_update = 1.005):
+def generate_input(add_num, altru_num, add_list=[], round=0, p_die_mu=0.02, p_die_sd=0.02, p_die_update = 1.005):
     global people
     global count
     global active
@@ -297,7 +302,7 @@ def generate_input(add_num, altru_num, add_list=[], round=0, p_die_mu=0.02, p_di
         count += 1
 
     # add altruistic donors
-    for i in range(altru_num):
+    if random.random() < altru_num:
         random_list = ["O" for i in range(45)] + ["A" for i in range(40)] + ["B" for i in range(11)] + ["AB" for i in range(4)]
         donor = random.choice(random_list)
 
@@ -343,7 +348,7 @@ def run():
     transplants = 0
     total_deaths = 0
     
-    num_rounds = 18
+    num_rounds = 48
     for round in range(num_rounds):
         
         # iterate through groups waiting operations to check for failures
@@ -363,14 +368,14 @@ def run():
         add_list = set(unsuccessful).difference(deaths)
 
         # there exist more params for generate_input 
-        working_file = generate_input(10, 1, add_list=add_list, round=round)
+        working_file = generate_input(7, 0.7, add_list=add_list, round=round)
 
         # input round number below
         inpt,nnds = generate_graph(working_file, round)
         
         # run round
-        os.system("cat %s %s | python3 -m kidney_solver.kidney_solver 500 500 %s"
-         %( inpt, nnds,"uef"))
+        os.system("cat %s %s | python3 -m kidney_solver.kidney_solver 3 20 %s"
+         %( inpt, nnds,"picef"))
         
         # jenn's crappy alternative
         # command = ("cat %s, %s | python3 -m kidney_solver.kidney_solver 500 500 %s"
@@ -419,7 +424,6 @@ def run():
     print("Total Saved: " + str(saved))
     print("Successful Transplants: ", history.successful)
     print("Failed Transplants: ",history.unsuccessful)
-    history.final_stats()
 
 
 if __name__=="__main__":
@@ -438,7 +442,11 @@ if __name__=="__main__":
         people = {}
         count = 0
         run()
-    print(total_transplants,total_deathss,total_saved)
+    print(total_transplants, statistics.mean(total_transplants))
+    print(total_deathss, statistics.mean(total_deathss))
+    print(total_saved, statistics.mean(total_saved))
+
+    # print(total_transplants, total_deathss, total_saved)
 
 
 
