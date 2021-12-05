@@ -247,20 +247,31 @@ function node(n){
   if (n == 1){
     dataset["nodes"] = [{name: "B | A"}, {name: "O | B"}, {name: "A | B"}, {name: "B | O"}, {name: "Altruist: A"}]
     dataset["edges"] = [
-      {source: 0, target: 2}, 
+      {source: 2, target: 0},
       {source: 1, target: 0},
       {source: 1, target: 3}, 
-      {source: 2, target: 0}, 
-      {source: 2, target: 3}, 
+      {source: 0, target: 2}, 
+      {source: 3, target: 2},  
       {source: 3, target: 0}, 
       {source: 3, target: 1}, 
-      {source: 3, target: 2}, 
+      {source: 2, target: 3}, 
       {source: 4, target: 2}, 
     ]
+
+    highlights = [];
+    highlights.push({
+      "vertices": [4, 2, 0],
+      "edges": [8, [0, 3]]
+    });
+    highlights.push({
+      "vertices": [4, 2, 3, 1, 0],
+      "edges": [8, 7, 6, 1]
+    });
+    highlights.push({
+      "vertices": [3, 0, 2, 3],
+      "edges": [5, 3, 7]
+    });
   }
-
-  console.log(dataset);
-
 
   var svg = d3.select("#right").append("svg").attr({"width":w,"height":h});
 
@@ -281,7 +292,7 @@ function node(n){
       .linkDistance([linkDistance])
       .charge([-500])
       .theta(0.1)
-      .gravity(0.05)
+      .gravity(0.1)
       .start();
 
   var edges = svg.selectAll("line")
@@ -297,8 +308,9 @@ function node(n){
     .data(dataset.nodes)
     .enter()
     .append("circle")
+    .attr("id",function(d,i) {return 'vertex'+i})
     .attr({"r":15})
-    .style("fill",function(d,i){return colors(i);})
+    .style("fill",function(d,i){return "grey";})
     .call(force.drag)
 
 
@@ -312,37 +324,6 @@ function node(n){
             "stroke":"black"})
       .text(function(d){return d.name;});
 
-  var edgepaths = svg.selectAll(".edgepath")
-      .data(dataset.edges)
-      .enter()
-      .append('path')
-      .attr({'d': function(d) {return 'M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y},
-              'class':'edgepath',
-              'fill-opacity':0,
-              'stroke-opacity':0,
-              'fill':'blue',
-              'stroke':'red',
-              'id':function(d,i) {return 'edgepath'+i}})
-      .style("pointer-events", "none");
-
-  var edgelabels = svg.selectAll(".edgelabel")
-      .data(dataset.edges)
-      .enter()
-      .append('text')
-      .style("pointer-events", "none")
-      .attr({'class':'edgelabel',
-              'id':function(d,i){return 'edgelabel'+i},
-              'dx':80,
-              'dy':0,
-              'font-size':10,
-              'fill':'#aaa'});
-
-  edgelabels.append('textPath')
-      .attr('xlink:href',function(d,i) {return ''})
-      .style("pointer-events", "none")
-      .text(function(d,i){return 'label '+i});
-
-
   svg.append('defs').append('marker')
       .attr({'id':'arrowhead',
               'viewBox':'-0 -5 10 10',
@@ -355,8 +336,8 @@ function node(n){
               'xoverflow':'visible'})
       .append('svg:path')
           .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
-          .attr('fill', '#ccc')
-          .attr('stroke','#ccc');
+          .attr('fill', 'rgba(0, 0, 0, 0.8)')
+          .attr('stroke','black');
     
 
   force.on("tick", function(){
@@ -374,20 +355,79 @@ function node(n){
       nodelabels.attr("x", function(d) { return d.x; }) 
                 .attr("y", function(d) { return d.y; });
 
-      edgepaths.attr('d', function(d) { var path='M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y;
-                                          //console.log(d)
-                                          return path});       
-
-      edgelabels.attr('transform',function(d,i){
-          if (d.target.x<d.source.x){
-              bbox = this.getBBox();
-              rx = bbox.x+bbox.width/2;
-              ry = bbox.y+bbox.height/2;
-              return 'rotate(180 '+rx+' '+ry+')';
-              }
-          else {
-              return 'rotate(0)';
-              }
-      });
   });
+
+  let counter = 0;
+  var highlight_vertices = [];
+  var highlight_edges = [];
+
+  for (let iter = 0; iter < 3; iter++){
+    for (let i = 0; i < highlights.length; i++){
+
+      console.log(highlights)
+
+      highlight_vertices = highlights[i]["vertices"];
+      highlight_edges = highlights[i]["edges"];
+
+      console.log(highlight_edges)
+
+      for (let j = 0; j < highlight_vertices.length - 1; j++){
+        d3.select("#vertex" + highlight_vertices[j])
+        .transition().duration(1000)
+        .style("fill", colors.range()[j])
+        .delay(counter * 1000 + 3000);
+
+        counter++;
+
+        if (Array.isArray(highlight_edges[j])){
+          d3.select("#edge" + highlight_edges[j][1])
+          .transition().duration(1000)
+          .style("stroke","red")
+          .delay(counter * 1000 + 3000);  
+          d3.select("#edge" + highlight_edges[j][0])
+          .transition().duration(1000)
+          .style("stroke","red")
+          .style("stroke-width", 1.5)
+          .delay(counter * 1000 + 3000);  
+        }
+
+        else {
+          d3.select("#edge" + highlight_edges[j])
+          .transition().duration(1000)
+          .style("stroke","red")
+          .style("stroke-width", 1.5)
+          .delay(counter * 1000 + 3000);  
+        }
+        counter++;
+
+      }
+
+      d3.select("#vertex" + highlight_vertices[highlight_vertices.length - 1])
+      .transition().duration(1000)
+      .style("fill", colors.range()[highlight_vertices.length - 1])
+      .delay(counter * 1000 + 3000);  
+
+      counter += 2;
+
+      // restore to normal colors
+      nodes
+      .transition().duration(2000)
+      .style("fill", "grey")
+      .delay(counter * 1000 + 3000);  
+
+      edges
+      .transition().duration(2000)
+      .style("stroke","#ccc")
+      .style("stroke-width", 1)
+      .delay(counter * 1000 + 3000);  
+
+      counter += 2;
+
+    }
+  }
+  nodes
+    .transition().duration(2000)
+    .style("fill",function(d,i){return colors.range()[i];})
+    .delay(counter * 1000 + 3000);  
 }
+
