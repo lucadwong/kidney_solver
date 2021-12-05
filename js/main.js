@@ -96,8 +96,8 @@ particlesJS('particles-js',
         "enable": true,
         "area": 800
       },
-      "limit": 500,
-      "value": 230
+      "limit": 800,
+      "value": 400
     },
     "opacity": {
       "animation": {
@@ -261,7 +261,7 @@ function node(n){
     highlights = [];
     highlights.push({
       "vertices": [4, 2, 0],
-      "edges": [8, [0, 3]]
+      "edges": [8, [0, 3]],
     });
     highlights.push({
       "vertices": [4, 2, 3, 1, 0],
@@ -271,6 +271,15 @@ function node(n){
       "vertices": [3, 0, 2, 3],
       "edges": [5, 3, 7]
     });
+
+    highlights_data = {
+      "add_round": 1,
+      "remove_round": 2,
+      "vertices_add": [3],
+      "vertices_remove": [4],
+      "edges_add": [2, 4, 5, 6, 7],
+      "edges_remove": [8]
+    }
   }
 
   var svg = d3.select("#right").append("svg").attr({"width":w,"height":h});
@@ -280,7 +289,7 @@ function node(n){
     .attr("height", "100%")
     .attr("fill", "white");
 
-  svg.append("text")
+  var text = svg.append("text")
     .attr("y", h * 0.075)
     .attr("x", w * 0.05)
     .text("Patient | Donor");
@@ -292,7 +301,7 @@ function node(n){
       .linkDistance([linkDistance])
       .charge([-500])
       .theta(0.1)
-      .gravity(0.1)
+      .gravity(0.05)
       .start();
 
   var edges = svg.selectAll("line")
@@ -320,6 +329,7 @@ function node(n){
       .append("text")
       .attr({"x":function(d){return d.x;},
             "y":function(d){return d.y;},
+            "id": function(d, i){return "nodelabel" + i},
             "class":"nodelabel",
             "stroke":"black"})
       .text(function(d){return d.name;});
@@ -361,15 +371,122 @@ function node(n){
   var highlight_vertices = [];
   var highlight_edges = [];
 
+  for (let j = 0; j < highlights_data["vertices_add"].length; j++){
+    d3.select("#vertex" + highlights_data["vertices_add"][j])
+    .transition().duration(1000)
+    .style("fill-opacity", 0)
+
+    d3.select("#nodelabel" + highlights_data["vertices_add"][j])
+    .transition().duration(1000)
+    .attr('opacity', 0)
+
+  }
+  for (let j = 0; j < highlights_data["edges_add"].length; j++){
+    console.log("hi")
+    d3.select("#edge" + highlights_data["edges_add"][j])
+    .transition().duration(1000)
+    .style("stroke-opacity", 0)
+    .attr('marker-end', null)
+  }
+
   for (let iter = 0; iter < 3; iter++){
+
+    if (iter != 0){
+      for (let j = 0; j < highlights_data["vertices_add"].length; j++){
+        d3.select("#vertex" + highlights_data["vertices_add"][j])
+        .transition().duration(1000)
+        .style("fill-opacity", 0)
+        .delay(counter * 1000 + 3000);
+    
+        d3.select("#nodelabel" + highlights_data["vertices_add"][j])
+        .transition().duration(1000)
+        .attr('opacity', 0)
+        .delay(counter * 1000 + 3000);
+    
+      }
+      for (let j = 0; j < highlights_data["edges_add"].length; j++){
+        console.log("hi")
+        d3.select("#edge" + highlights_data["edges_add"][j])
+        .transition().duration(1000)
+        .style("stroke-opacity", 0)
+        .attr('marker-end', null)
+        .delay(counter * 1000 + 3000);
+      }
+    }
+    
     for (let i = 0; i < highlights.length; i++){
 
-      console.log(highlights)
+      // adding vertices in 
+      if (i == highlights_data["add_round"]){
+        
+        text
+        .transition().duration(1000)
+        .text("Adding Patient | Donor Pairs")
+        .delay(counter * 1000 + 1000);
+
+        for (let j = 0; j < highlights_data["vertices_add"].length; j++){
+          
+          d3.select("#vertex" + highlights_data["vertices_add"][j])
+          .transition().duration(1000)
+          .style("fill-opacity", 1)
+          .delay(counter * 1000 + 3000);
+
+          d3.select("#nodelabel" + highlights_data["vertices_add"][j])
+          .transition().duration(1000)
+          .attr('opacity', 1)
+          .delay(counter * 1000 + 3000);
+        }
+        for (let j = 0; j < highlights_data["edges_add"].length; j++){
+          d3.select("#edge" + highlights_data["edges_add"][j])
+          .transition().duration(1000)
+          .style("stroke-opacity", 1)
+          .attr('marker-end','url(#arrowhead)')
+          .delay(counter * 1000 + 3000);
+        }
+
+        counter++;
+      }
+
+
+      // removing vertices
+      else if (i == highlights_data["remove_round"]){
+
+        text
+        .transition().duration(1000)
+        .text("Removing Patient | Donor Pair")
+        .delay(counter * 1000 + 2000);
+
+        for (let j = 0; j < highlights_data["vertices_remove"].length; j++){
+          d3.select("#vertex" + highlights_data["vertices_remove"][j])
+          .transition().duration(1000)
+          .style("fill-opacity", "0")
+          .delay(counter * 1000 + 3000);
+
+          d3.select("#nodelabel" + highlights_data["vertices_remove"][j])
+          .transition().duration(1000)
+          .attr('opacity', 0)
+          .delay(counter * 1000 + 3000);
+
+        }
+        for (let j = 0; j < highlights_data["edges_remove"].length; j++){
+          d3.select("#edge" + highlights_data["edges_remove"][j])
+          .transition().duration(1000)
+          .style("stroke-opacity", 0)
+          .attr('marker-end', null)
+          .delay(counter * 1000 + 3000);
+        }
+
+        counter++;
+      }
+      else {
+        text
+        .transition().duration(1000)
+        .text("Patient | Donor")
+        .delay(counter * 1000 + 3000);
+      }
 
       highlight_vertices = highlights[i]["vertices"];
       highlight_edges = highlights[i]["edges"];
-
-      console.log(highlight_edges)
 
       for (let j = 0; j < highlight_vertices.length - 1; j++){
         d3.select("#vertex" + highlight_vertices[j])
@@ -411,23 +528,36 @@ function node(n){
 
       // restore to normal colors
       nodes
-      .transition().duration(2000)
+      .transition().duration(1000)
       .style("fill", "grey")
+      .style("fill-opacity", 1)
       .delay(counter * 1000 + 3000);  
 
+      nodelabels
+      .transition().duration(1000)
+      .attr('opacity', 1)
+      .delay(counter * 1000 + 3000);
+
       edges
-      .transition().duration(2000)
+      .transition().duration(1000)
       .style("stroke","#ccc")
       .style("stroke-width", 1)
+      .style("stroke-opacity", 1)
+      .attr('marker-end','url(#arrowhead)')
       .delay(counter * 1000 + 3000);  
 
       counter += 2;
 
     }
   }
+  text
+        .transition().duration(1000)
+        .text("Patient | Donor")
+        .delay(counter * 1000 + 2000);
   nodes
     .transition().duration(2000)
     .style("fill",function(d,i){return colors.range()[i];})
+    .style("opacity", 1)
     .delay(counter * 1000 + 3000);  
 }
 
