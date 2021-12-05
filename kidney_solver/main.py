@@ -103,7 +103,7 @@ def update_operations(deaths):
             active.update(set(alive_returners))
     
     for cycle in operations["cycles"].copy():
-        if set(cycles) & deaths:
+        if set(cycle) & deaths:
             del operations["cycles"][cycle]
             all_returners = set([person for person in cycle])
             alive_returners = set([person for person in cycle if person not in deaths])
@@ -343,7 +343,7 @@ def run():
     transplants = 0
     total_deaths = 0
     
-    num_rounds = 36
+    num_rounds = 18
     for round in range(num_rounds):
         
         # iterate through groups waiting operations to check for failures
@@ -369,16 +369,16 @@ def run():
         inpt,nnds = generate_graph(working_file, round)
         
         # run round
-        # os.system("cat %s %s | python3 -m kidney_solver.kidney_solver 500 500 %s"
-        #  %( inpt, nnds,"uef"))
+        os.system("cat %s %s | python3 -m kidney_solver.kidney_solver 500 500 %s"
+         %( inpt, nnds,"uef"))
         
         # jenn's crappy alternative
         # command = ("cat %s, %s | python3 -m kidney_solver.kidney_solver 500 500 %s"
         # %( inpt, nnds,"uef"))
         
-        command = ("cat %s, %s | python3 -m kidney_solver.kidney_solver 3 20 %s"
-        %( inpt, nnds,"picef"))
-        subprocess.call('powershell.exe %s' % (command), shell=True)
+        # command = ("cat %s, %s | python3 -m kidney_solver.kidney_solver 3 20 %s"
+        # %( inpt, nnds,"picef"))
+        # subprocess.call('powershell.exe %s' % (command), shell=True)
         
         # cycles, chains = kidney_solver.run_round(i)
         cycles, chains = check_cycles_chains()
@@ -423,7 +423,7 @@ def run():
 
 
 if __name__=="__main__":
-    for _ in range(4):
+    for _ in range(10):
         # keeps track of all operations
         operations = {"cycles": {}, "chains": {}, "people_waiting": set()}
 
