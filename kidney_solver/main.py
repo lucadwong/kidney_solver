@@ -190,7 +190,7 @@ def generate_graph(input_file, round):
             if i == j:
                 continue
 
-            if data[i]["donor"] == "O" or data[i]["donor"] in data[j]["patient"]:
+            if data[i]["donor"] == "O" or data[i]["donor"] in data[j]["patient"] and data[j]["patient"] != 'None':
                 if data[i]["patient"] != 'None':
                     graph[i].append(j)
                     edges[(int(i), int(j))] = generate_failure_prob(True)
