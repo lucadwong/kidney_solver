@@ -56,3 +56,11 @@ class History:
             pprint.pformat(self.deaths[i]),
             pprint.pformat(self.successful[i]))
 
+    def final_stats(self):
+        print("Deaths:           ", [len(d) for d in self.deaths])
+        print("Successful:       ", [len(s) for s in self.successful])
+        print("Total deaths:     ", sum([len(d) for d in self.deaths]))
+        print("Total successful: ", sum([len(s) for s in self.successful]))
+
+    
+
