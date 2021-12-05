@@ -1,4 +1,5 @@
 import os
+import subprocess
 from . import kidney_solver
 from .history import History
 from csv import DictReader
@@ -326,15 +327,22 @@ def generate_input(add_num, altru_num, add_list=[], round=0, p_die_mu=0.01, p_di
     return(f'./working/working{round}.csv')
 
 
+total_transplants = []
+total_deathss = []
 
-if __name__=="__main__":
+# if __name__=="__main__":
+
+def run():
+    global cycles
+    global total_transplants
+    global total_deathss
     #create an initial file
 
     # relevant statistics
     transplants = 0
     total_deaths = 0
     
-    num_rounds = 48
+    num_rounds = 24
     for round in range(num_rounds):
         
         # iterate through groups waiting operations to check for failures
@@ -360,8 +368,13 @@ if __name__=="__main__":
         inpt,nnds = generate_graph(working_file, round)
         
         # run round
-        os.system("cat %s %s | python3 -m kidney_solver.kidney_solver 500 500 %s"
-         %( inpt, nnds,"uef"))
+        # os.system("cat %s %s | python3 -m kidney_solver.kidney_solver 500 500 %s"
+        #  %( inpt, nnds,"uef"))
+        
+        # jenn's crappy alternative
+        command = ("cat %s, %s | python3 -m kidney_solver.kidney_solver 500 500 %s"
+        %( inpt, nnds,"uef"))
+        subprocess.call('powershell.exe %s' % (command), shell=True)
         
         # cycles, chains = kidney_solver.run_round(i)
         cycles, chains = check_cycles_chains()
@@ -383,12 +396,32 @@ if __name__=="__main__":
         # add history
         history.add_round(cycles, chains, operations, deaths, successful, unsuccessful, active)
 
+    total_transplants.append(transplants)
+    total_deathss.append(total_deaths)
     print("Total Transplants: " + str(transplants))
     print("Total Deaths: " + str(total_deaths))
     print("Successful Transplants: ", history.successful)
     print("Failed Transplants: ",history.unsuccessful)
+    history.final_stats()
 
-        
+
+if __name__=="__main__":
+    for _ in range(10):
+        # keeps track of all operations
+        operations = {"cycles": {}, "chains": {}, "people_waiting": set()}
+
+        # set of active agents (can be matched in algorithm) and alive agents
+        active = set()
+        alive = set()
+
+        # keep a history class
+        history = History()
+
+        # keeping track of all people
+        people = {}
+        count = 0
+        run()
+    print(total_transplants,total_deathss)
 
 
 
