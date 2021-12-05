@@ -68,10 +68,9 @@ def check_waiting_operations(round):
 
     completed = set()
 
-    if chains_to_check.extend(cycles_to_check):
-        for c in chains_to_check.extend(cycles_to_check):
-            for person in c:
-                completed.add(person)
+    for c in chains_to_check + cycles_to_check:
+        for person in c:
+            completed.add(person)
 
     operations["people_waiting"].difference_update(completed)
 
@@ -267,12 +266,14 @@ def generate_input(add_num, altru_num, add_list=[], round=0, p_die_mu=0.01, p_di
     # add new people
     for i in range(add_num):
         # 45% O, 40% A, 11% B, 4% AB
-        random_list = ["O" for i in range(45)] + ["A" for i in range(40)] + ["B" for i in range(11)] + ["AB" for i in range(4)]
+        random_patient = ["O" for i in range(46)] + ["A" for i in range(41)] + ["B" for i in range(12)] + ["AB" for i in range(1)]
+        random_donor = ["O" for i in range(30)] + ["A" for i in range(51)] + ["B" for i in range(14)] + ["AB" for i in range(5)]
+        
         while True:
-            patient = random.choice(random_list)
-            donor = random.choice(random_list)
+            patient = random.choice(random_patient)
+            donor = random.choice(random_donor)
 
-            if not patient == "AB" and donor not in patient and not donor == "O":
+            if donor not in patient:
                 break
 
         # change probability someone dies generation
@@ -359,7 +360,7 @@ if __name__=="__main__":
         inpt,nnds = generate_graph(working_file, round)
         
         # run round
-        os.system("cat %s %s | python3 -m kidney_solver.kidney_solver 50 50 %s"
+        os.system("cat %s %s | python3 -m kidney_solver.kidney_solver 500 500 %s"
          %( inpt, nnds,"uef"))
         
         # cycles, chains = kidney_solver.run_round(i)
