@@ -236,7 +236,7 @@ def generate_graph(input_file, round):
     return f'graphs/graph{round}.input', f'graphs/graph{round}.ndds'
 
 # def generate_input(add_num, altru_num, add_list=[], round=0, count=0, people={}, p_die_mu=0.3, p_die_sd=0.15, p_die_update = 1.1):
-def generate_input(add_num, altru_num, add_list=[], round=0, p_die_mu=0.01, p_die_sd=0.005, p_die_update = 1.01):
+def generate_input(add_num, altru_num, add_list=[], round=0, p_die_mu=0.02, p_die_sd=0.01, p_die_update = 1.005):
     global people
     global count
     global active
@@ -329,6 +329,7 @@ def generate_input(add_num, altru_num, add_list=[], round=0, p_die_mu=0.01, p_di
 
 total_transplants = []
 total_deathss = []
+total_saved = []
 
 # if __name__=="__main__":
 
@@ -342,7 +343,7 @@ def run():
     transplants = 0
     total_deaths = 0
     
-    num_rounds = 24
+    num_rounds = 36
     for round in range(num_rounds):
         
         # iterate through groups waiting operations to check for failures
@@ -372,8 +373,11 @@ def run():
         #  %( inpt, nnds,"uef"))
         
         # jenn's crappy alternative
-        command = ("cat %s, %s | python3 -m kidney_solver.kidney_solver 500 500 %s"
-        %( inpt, nnds,"uef"))
+        # command = ("cat %s, %s | python3 -m kidney_solver.kidney_solver 500 500 %s"
+        # %( inpt, nnds,"uef"))
+        
+        command = ("cat %s, %s | python3 -m kidney_solver.kidney_solver 3 20 %s"
+        %( inpt, nnds,"picef"))
         subprocess.call('powershell.exe %s' % (command), shell=True)
         
         # cycles, chains = kidney_solver.run_round(i)
@@ -396,17 +400,30 @@ def run():
         # add history
         history.add_round(cycles, chains, operations, deaths, successful, unsuccessful, active)
 
+    all_deaths = set()
+    for death_set in history.deaths:
+        all_deaths.update(death_set)
+
+    all_successful = set()
+    for success_set in history.successful:
+        all_successful.update(success_set)
+
+    saved = len(all_deaths.intersection(all_successful))
+    total_deaths -= saved
+
     total_transplants.append(transplants)
     total_deathss.append(total_deaths)
+    total_saved.append(saved)
     print("Total Transplants: " + str(transplants))
     print("Total Deaths: " + str(total_deaths))
+    print("Total Saved: " + str(saved))
     print("Successful Transplants: ", history.successful)
     print("Failed Transplants: ",history.unsuccessful)
     history.final_stats()
 
 
 if __name__=="__main__":
-    for _ in range(10):
+    for _ in range(4):
         # keeps track of all operations
         operations = {"cycles": {}, "chains": {}, "people_waiting": set()}
 
@@ -421,7 +438,7 @@ if __name__=="__main__":
         people = {}
         count = 0
         run()
-    print(total_transplants,total_deathss)
+    print(total_transplants,total_deathss,total_saved)
 
 
 
