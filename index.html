@@ -1,8 +1,5 @@
 <html>
 <head>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-162312637-1"></script>
-
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous"> 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
@@ -16,11 +13,6 @@
     <!-- JS Libraries -->
     <script src="https://unpkg.com/scrollreveal"></script>
     <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-
-    <!-- Meta Data -->
-    <meta name="description" content="I'm Phyllis Zhang, a student at Harvard College with a passion for learning and problem solving, especially when it comes to computer science and medicine!">
-    <meta name="author" content="Phyllis Zhang">
-    <meta name="keywords" content="phyllis zhang, harvard, harvard university, lubbock, tx, texas">
 
     <!-- Header -->
     <title>Kidney Matching</title>
@@ -49,10 +41,10 @@
         </div>
         <div class='btn-group' role='group' style='float: right; height: 5%;' id='footer'>
             <button id='slide1' type='button' class='btn nav btn-sm' onclick="section('1'); node(1)" style="color:grey">1</button>
-            <button id='slide2' type='button' class='btn nav btn-sm' onclick="section('2')">2</button>
+            <button id='slide2' type='button' class='btn nav btn-sm' onclick="section('2');">2</button>
             <button id='slide3' type='button' class='btn nav btn-sm' onclick="section('3')">3</button>
             <button id='slide4' type='button' class='btn nav btn-sm' onclick="section('4')">4</button>
-            <button id='slide5' type='button' class='btn nav btn-sm' onclick="section('5')">5</button>
+            <button id='slide5' type='button' class='btn nav btn-sm' onclick="section('5'); line('./line_graph/example.csv')">5</button>
             <button id='slide6' type='button' class='btn nav btn-sm' onclick="section('6')">6</button>
             <button id='slide7' type='button' class='btn nav btn-sm' onclick="section('7')">7</button>
             <button id='slide8' type='button' class='btn nav btn-sm' onclick="section('8')">8</button>

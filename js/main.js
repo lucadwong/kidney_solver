@@ -73,7 +73,7 @@ particlesJS('particles-js',
       "distance": 120,
       "enable": true,
       "opacity": 0.4,
-      "width": 1
+      "w": 1
     },
     "move": {
       "attract": {
@@ -127,7 +127,7 @@ particlesJS('particles-js',
     "draw": {
       "enable": false,
       "lineColor": "#ffffff",
-      "lineWidth": 0.5
+      "linew": 0.5
     },
     "move": {
       "radius": 5
@@ -189,7 +189,7 @@ function section(n){
         "title": "Evaluating Different Prioritization Schemes in Kidney Matching: <br/> Who, When, and How?",
         "subtitle": "Luca D'Amico-Wong, Jennifer Liang, <br/> Phyllis Zhang",
         "left": "5",
-        "right": "Right Content"
+        "right": "<select class='form-control' id='select-form'><option value='1'>Metric 1</option><option value='2'>Metric 2</option><option value='3'>Metric 3</option></select><br/>"
     })
     content.push({
         "title": "Evaluating Different Prioritization Schemes in Kidney Matching: <br/> Who, When, and How?",
@@ -219,7 +219,7 @@ function section(n){
         "title": "Evaluating Different Prioritization Schemes in Kidney Matching: <br/> Who, When, and How?",
         "subtitle": "Luca D'Amico-Wong, Jennifer Liang, <br/> Phyllis Zhang",
         "left": "",
-        "right": "<div class='row'><div class='col-6'><img src='./img/luca.png' style='width: 70%; float: right'></div><div class='col-6'><img src='./img/jennifer.jpg' style='width: 70%';></div></div><br/><div class='row'><div class='col-12'><img src='./img/phyllis.jpg' style='width: 35%'></div></div>"
+        "right": "<div class='row'><div class='col-6'><img src='./img/luca.png' style='w: 70%; float: right'></div><div class='col-6'><img src='./img/jennifer.jpg' style='w: 70%';></div></div><br/><div class='row'><div class='col-12'><img src='./img/phyllis.jpg' style='w: 35%'></div></div>"
     })
 
 
@@ -334,6 +334,7 @@ function node(n){
             "stroke":"black"})
       .text(function(d){return d.name;});
 
+  
   svg.append('defs').append('marker')
       .attr({'id':'arrowhead',
               'viewBox':'-0 -5 10 10',
@@ -348,7 +349,6 @@ function node(n){
           .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
           .attr('fill', 'rgba(0, 0, 0, 0.8)')
           .attr('stroke','black');
-    
 
   force.on("tick", function(){
 
@@ -382,7 +382,6 @@ function node(n){
 
   }
   for (let j = 0; j < highlights_data["edges_add"].length; j++){
-    console.log("hi")
     d3.select("#edge" + highlights_data["edges_add"][j])
     .transition().duration(1000)
     .style("stroke-opacity", 0)
@@ -559,4 +558,304 @@ function node(n){
     .style("opacity", 1)
     .delay(counter * 1000 + 3000);  
 }
+function line(path)
+{
+  d3.csv(path, function(d) { 
+    drawLine(d);
+  });
 
+}
+
+function drawLine(d){
+  var data = [];
+
+  var selected = "1";
+
+  for (let i = 0; i < d.length; i++){
+    if (d[i]["metric"] == selected){
+      data.push(d[i])
+    }
+  }
+  var h = document.getElementById('right').clientHeight  * 0.87;
+  var w = document.getElementById('right').clientWidth;
+
+  var margin = {
+    top: 20,
+    right: 65,
+    bottom: 30,
+    left: 50
+  },
+  width = w - margin.left - margin.right,
+  height = h - margin.top - margin.bottom;
+
+  var x = d3.scale.linear()
+    .range([0, width]);
+
+  var y = d3.scale.linear()
+    .range([height, 35]);
+
+  var color = d3.scale.category10();
+
+  var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+  var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
+
+  var line_var = d3.svg.line()
+    .interpolate("basis")
+    .x(function(d) {
+      return x(d.x);
+    })
+    .y(function(d) {
+      return y(d.n);
+    });
+
+
+  var svg = d3.select("#right").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    .style("font-size", "12px");
+
+  svg
+    .append("rect")
+    .attr("width", w)
+    .attr("height", h)
+    .attr("fill", "white")
+    .attr("transform", "translate(" + (-1 * margin.left) + "," + (-1 * margin.top) + ")");
+
+  color.domain(d3.keys(data[0]).filter(function(key) {
+    return key !== "x" && key !== "metric";
+  }));
+
+  var alg = color.domain().map(function(name) {
+    return {
+      name: name,
+      values: data.map(function(d) {
+        return {
+          x: d.x,
+          n: +d[name]
+        };
+      })
+    };
+  });
+
+  var total_alg = color.domain().map(function(name) {
+    return {
+      name: name,
+      values: d.map(function(d) {
+        return {
+          x: d.x,
+          n: +d[name]
+        };
+      })
+    };
+  });
+
+  x.domain(d3.extent(d, function(d) {
+    return d.x;
+  }));
+
+  y.domain([
+    d3.min(total_alg, function(c) {
+      return d3.min(c.values, function(v) {
+        return v.n;
+      });
+    }),
+    d3.max(total_alg, function(c) {
+      return d3.max(c.values, function(v) {
+        return v.n;
+      });
+    })
+  ]);
+
+  var legend = svg.selectAll('g')
+    .data(alg)
+    .enter()
+    .append('g')
+    .attr('class', 'legend');
+
+  legend.append('rect')
+    .attr('x', width - 20)
+    .attr('y', function(d, i) {
+      return i * 20;
+    })
+    .attr('width', 10)
+    .attr('height', 10)
+    .style('fill', function(d) {
+      return color(d.name);
+    });
+
+  legend.append('text')
+    .attr('x', width - 5)
+    .attr('y', function(d, i) {
+      return (i * 20) + 9;
+    })
+    .text(function(d) {
+      return d.name;
+    });
+
+  svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis)
+    .append("text")
+    .attr("x", width + 40)
+    .attr("dy", "-0.31em")
+    .style("text-anchor", "end")
+    .text("Round #");;
+
+  svg.append("g")
+    .attr("class", "y axis")
+    .call(yAxis)
+    .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 6)
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text("Number");
+
+  var city = svg.selectAll(".city")
+    .data(alg)
+    .enter().append("g")
+    .attr("class", "city");
+
+  var edit_path = city.append("path")
+    .attr("class", "line")
+    .style("stroke", function(d) {
+      return color(d.name);
+    })
+    .style("stroke-width", 2)
+    .attr("d", function(d) {
+      return line_var(d.values);
+    })
+
+  var mouseG = svg.append("g")
+    .attr("class", "mouse-over-effects");
+  
+  mouseG.append("path") // this is the black vertical line to follow mouse
+    .attr("class", "mouse-line")
+    .style("stroke", "black")
+    .style("stroke-width", "1px")
+    .style("opacity", "0");
+    
+  var lines = document.getElementsByClassName('line');
+
+  var mousePerLine = mouseG.selectAll('.mouse-per-line')
+    .data(alg)
+    .enter()
+    .append("g")
+    .attr("class", "mouse-per-line");
+
+  mousePerLine.append("circle")
+    .attr("r", 7)
+    .style("stroke", function(d) {
+      return color(d.name);
+    })
+    .style("fill", "none")
+    .style("stroke-width", "1px")
+    .style("opacity", "0");
+
+  mousePerLine.append("text")
+    .attr("transform", "translate(10,3)");
+
+  mouseG.append('svg:rect') // append a rect to catch mouse movements on canvas
+    .attr('width', width) // can't catch mouse events on a g element
+    .attr('height', height)
+    .attr('fill', 'none')
+    .attr('pointer-events', 'all')
+    .on('mouseout', function() { // on mouse out hide line, circles and text
+      d3.select(".mouse-line")
+        .style("opacity", "0");
+      d3.selectAll(".mouse-per-line circle")
+        .style("opacity", "0");
+      d3.selectAll(".mouse-per-line text")
+        .style("opacity", "0");
+    })
+    .on('mouseover', function() { // on mouse in show line, circles and text
+      d3.select(".mouse-line")
+        .style("opacity", "1");
+      d3.selectAll(".mouse-per-line circle")
+        .style("opacity", "1");
+      d3.selectAll(".mouse-per-line text")
+        .style("opacity", "1");
+    })
+    .on('mousemove', function() { // mouse moving over canvas
+      var mouse = d3.mouse(this);
+      d3.select(".mouse-line")
+        .attr("d", function() {
+          var d = "M" + mouse[0] + "," + height;
+          d += " " + mouse[0] + "," + 0;
+          return d;
+        });
+
+      d3.selectAll(".mouse-per-line")
+        .attr("transform", function(d, i) {
+          var xDate = x.invert(mouse[0]),
+              bisect = d3.bisector(function(d) { return d.x; }).right;
+              idx = bisect(d.values, xDate);
+          
+          var beginning = 0,
+              end = lines[i].getTotalLength(),
+              target = null;
+
+          while (true){
+            target = Math.floor((beginning + end) / 2);
+            pos = lines[i].getPointAtLength(target);
+            if ((target === end || target === beginning) && pos.x !== mouse[0]) {
+                break;
+            }
+            if (pos.x > mouse[0])      end = target;
+            else if (pos.x < mouse[0]) beginning = target;
+            else break; //position found
+          }
+          
+          d3.select(this).select('text')
+            .text(y.invert(pos.y).toFixed(2));
+            
+          return "translate(" + mouse[0] + "," + pos.y +")";
+        });
+  });
+  function update(selected) {
+
+    let data = [];
+    for (let i = 0; i < d.length; i++){
+      if (d[i]["metric"] == selected){
+        data.push(d[i])
+      }
+    }
+
+    // Give these new data to update line
+
+    alg = color.domain().map(function(name) {
+      return {
+        name: name,
+        values: data.map(function(d) {
+          return {
+            x: d.x,
+            n: +d[name]
+          };
+        })
+      };
+    });
+
+    edit_path
+    .data(alg)
+    .transition().duration(1000)
+    .attr("d", function(d){
+      return line_var(d.values);
+    })
+  }
+
+  // When the button is changed, run the updateChart function
+  d3.select("#select-form").on("change", function(d) {
+      // recover the option that has been chosen
+      var selectedOption = d3.select("#select-form").property("value")
+      // run the updateChart function with this selected option
+      update(selectedOption)
+  })
+}
