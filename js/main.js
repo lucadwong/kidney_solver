@@ -405,7 +405,6 @@ function node(n){
     
       }
       for (let j = 0; j < highlights_data["edges_add"].length; j++){
-        console.log("hi")
         d3.select("#edge" + highlights_data["edges_add"][j])
         .transition().duration(1000)
         .style("stroke-opacity", 0)
@@ -422,7 +421,7 @@ function node(n){
         text
         .transition().duration(1000)
         .text("Adding Patient | Donor Pairs")
-        .delay(counter * 1000 + 1000);
+        .delay(counter * 1000);
 
         for (let j = 0; j < highlights_data["vertices_add"].length; j++){
           
@@ -454,7 +453,7 @@ function node(n){
         text
         .transition().duration(1000)
         .text("Removing Patient | Donor Pair")
-        .delay(counter * 1000 + 2000);
+        .delay(counter * 1000 + 1000);
 
         for (let j = 0; j < highlights_data["vertices_remove"].length; j++){
           d3.select("#vertex" + highlights_data["vertices_remove"][j])
@@ -553,7 +552,7 @@ function node(n){
   text
         .transition().duration(1000)
         .text("Patient | Donor")
-        .delay(counter * 1000 + 2000);
+        .delay(counter * 1000 + 1000);
   nodes
     .transition().duration(2000)
     .style("fill",function(d,i){return colors.range()[i];})
