@@ -2,21 +2,19 @@ import os
 from . import kidney_solver
 from .history import History
 from csv import DictReader
-import random 
+import random
 import numpy as np
 from time import sleep
 
-# wait time
+# wait time before processing transplants
 wait_time = 4
 
-# list of patients in limbo "cycles":[[],[],[]], "chains":[[],[],[]]
-awaiting_operations = {"cycles": [],"chains": []}
+# keeps track of all operations
+operations = {"cycles": {}, "chains": {}, "people_waiting": set()}
 
-# essentially all details regarding patients
-pairs = dict()
-
-# set of active pairs
-active_pairs = set()
+# set of active agents (can be matched in algorithm) and alive agents
+active = set()
+alive = set()
 
 # keep a history class
 history = History()
@@ -35,70 +33,83 @@ def check_waiting_operations(round):
     successful = []
     unsuccessful = []
 
-    chains_to_check = []
-    cycles_to_check = []
     # check which chains and cycles are due for operation
-    for chains in awaiting_operations["chains"]:
-        for due_date, c in chains:
-            if due_date == round:
-                chains_to_check.append(c)
-    
-    for cycles in awaiting_operations["cycles"]:
-        for due_date, c in cycles:
-            if due_date == round:
-                cycles_to_check.append(c)
+    chains_to_check = [chain for chain in operations["chains"] if operations["chains"][chain] == round]
+    cycles_to_check = [cycle for cycle in operations["cycles"] if operations["cycles"][cycle] == round]
 
-    print(edges.keys())
-
-    # do some things to figure out which were successful and which were not successful
-
+    # check if cycle succeeds
     for cycle in cycles_to_check:
-        length = len(cycle)
-        for i in range(length-1):
+        succ = True
+        for i in range(len(cycle)-1):
             if random.random() < edges[(cycle[i], cycle[i+1])]:
-                unsuccessful.extend(cycle)
-            if random.random() < edges[(cycle[length - 1], cycle[0])]:
-                unsuccessful.extend(cycle)
-        successful.extend(cycle)
+                succ = False
+                break
+        if random.random() < edges[(cycle[len(cycle) - 1], cycle[0])]:
+            succ = False            
+        successful.extend(cycle) if succ else unsuccessful.extend(cycle)
 
-    # CHECK THIS – IT MIGHT BE WRONG
+        # remove cycle from operations after simulation
+        del operations["cycles"][cycle]
+
+    # check if chain succeeds
     for chain in chains_to_check:
-        length = len(chain)
-        for i in range(length-1):
-            print(i)
-            if random.random() < edges[(chain[i], chain[i+1])]:
+        for i in range(len(chain)-1):
+            if random.random() > edges[(chain[i], chain[i+1])]:
                 successful.append(chain[i+1])
             else:
                 unsuccessful.extend(chain[i+1: ])
-
-    # remove the successful from the active pairs
-
-    active_pairs.difference_update(set(successful))
+                break
+        
+        # remove chain from operations after simulation
+        del operations["chains"][chain]
 
     # add the unsuccessful back to the active set
+    active.update(set(unsuccessful))
 
-    active_pairs.update(set(unsuccessful))
+    completed = set()
+
+    if chains_to_check.extend(cycles_to_check):
+        for c in chains_to_check.extend(cycles_to_check):
+            for person in c:
+                completed.add(person)
+
+    operations["people_waiting"].difference_update(completed)
 
     return successful, unsuccessful
 
 def check_deaths():
-    deaths = []
-    #check patients active in the pool
-    for id in active_pairs:
+    
+    deaths = set()
+    
+    #check if any alive people die this round
+    for id in alive:
         if random.random() < float(people[id]["p_die"]):
-            deaths.append(id)
-    #check patients who are inactive and awaiting operation
-    for chains in awaiting_operations["chains"]:
-        for _, chain in chains:
-            for id in chain:
-                if random.random() < float(people[id]["p_die"]):
-                    deaths.append(id)
-    for cycles in awaiting_operations["cycles"]:
-        for _, cycle in cycles:
-            for id in cycle:
-                if random.random() < float(people[id]["p_die"]):
-                    deaths.append(id)
+            deaths.add(id)
+    
+    # update alive and active sets accordingly
+    alive.difference_update(set(deaths))
+    active.difference_update(set(deaths))
+
     return deaths
+
+def update_operations(deaths):
+
+    for chain in operations["chains"].copy():
+        if set(chain) & deaths:
+            del operations["chains"][chain]
+            all_returners = set([person for person in chain])
+            alive_returners = set([person for person in chain if person not in deaths])
+            operations["people_waiting"].difference_update(all_returners)
+            active.update(set(alive_returners))
+    
+    for cycle in operations["cycles"].copy():
+        if set(cycles) & deaths:
+            del operations["cycles"][cycle]
+            all_returners = set([person for person in cycle])
+            alive_returners = set([person for person in cycle if person not in deaths])
+            operations["people_waiting"].difference_update(all_returners)
+            active.update(set(alive_returners))
+
 
 def check_cycles_chains():
     cycles = []
@@ -111,6 +122,7 @@ def check_cycles_chains():
             if line == 'chains':
                 on_cycles = False
             if line == '':
+                li = tuple(li)
                 cycles.append(li) if on_cycles else chains.append(li)
                 li = []
             try:
@@ -119,12 +131,12 @@ def check_cycles_chains():
             except:
                 pass
 
-        print(cycles, chains)
-        return cycles, chains
+    return cycles, chains
 
 # generates failure probabilities for each edge
 def generate_failure_prob(constant):
     
+    # generate either constant failure probabilities or varying failure probabilities
     if constant:
         return 0.7
     else:
@@ -132,7 +144,7 @@ def generate_failure_prob(constant):
         while failure < 0 or failure > 1:
             failure = np.random.normal(0.7, 0.1)
         
-        return failure
+    return failure
 
 def generate_graph(input_file, round):
 
@@ -144,7 +156,6 @@ def generate_graph(input_file, round):
     
     graph = {}
     graph_ndd = {}
-    # edges = {}
 
     data = {}
     altru_num = 0
@@ -163,7 +174,6 @@ def generate_graph(input_file, round):
 
             if row["patient"] == "None":
                 altru_num += 1
-                print(row["index"])
 
             else:
                 pair_num +=1
@@ -225,11 +235,11 @@ def generate_graph(input_file, round):
 
     return f'graphs/graph{round}.input', f'graphs/graph{round}.ndds'
 
-# def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, count=0, people={}, p_die_mu=0.3, p_die_sd=0.15, p_die_update = 1.1):
-def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, p_die_mu=0.2, p_die_sd=0.1, p_die_update = 1.04):
+# def generate_input(add_num, altru_num, add_list=[], round=0, count=0, people={}, p_die_mu=0.3, p_die_sd=0.15, p_die_update = 1.1):
+def generate_input(add_num, altru_num, add_list=[], round=0, p_die_mu=0.01, p_die_sd=0.005, p_die_update = 1.01):
     global people
     global count
-    global active_pairs
+    global active
     current_data = {}
 
     if round != 0:
@@ -237,6 +247,10 @@ def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, p_d
         reader = DictReader(csvfile)
         
         for row in reader:
+
+            if int(row["index"]) not in active:
+                continue
+
             current_data[row["index"]] = {
                 "index": row["index"],
                 "patient": row["patient"],
@@ -245,13 +259,6 @@ def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, p_d
             }
             # change probability person dies each round
             current_data[row["index"]]["p_die"] *= p_die_update
-
-    # delete people from list
-    for vertex in remove_list:
-        try:
-            del current_data[str(vertex)]
-        except:
-            print("oops")
 
     # add people back to list
     for vertex in add_list:
@@ -279,7 +286,10 @@ def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, p_d
             "donor": donor,
             "p_die": p_die
         }
-        active_pairs.add(count)
+        
+        # add newly generated pairs to active, alive sets
+        active.add(count)
+        alive.add(count)
 
         current_data[count] = people[count]
         count += 1
@@ -296,7 +306,9 @@ def generate_input(add_num, altru_num, remove_list=[], add_list=[], round=0, p_d
             "p_die": "0.0"
         }
         
-        active_pairs.add(count)
+        # add newly generated altruistic donors to active, alive sets
+        active.add(count)
+        alive.add(count)
 
         current_data[count] = people[count]
         count += 1
@@ -321,7 +333,7 @@ if __name__=="__main__":
     transplants = 0
     total_deaths = 0
     
-    num_rounds = 10
+    num_rounds = 48
     for round in range(num_rounds):
         
         # iterate through groups waiting operations to check for failures
@@ -329,37 +341,50 @@ if __name__=="__main__":
         
         # finds deaths
         deaths = check_deaths()
-
-        # adds deaths and transplants
+        
+        # updates deaths and transplants
         total_deaths += len(deaths)
         transplants += len(successful)
 
-        s1 = set(unsuccessful)
-        s2 = set(deaths)
-        add_list = list(s1.difference(s2))      
+        # get rid of operations with dead people
+        update_operations(deaths) 
+
+        # add unsuccessful transplant patients
+        add_list = set(unsuccessful).difference(deaths)
+
         # there exist more params for generate_input 
-        working_file = generate_input(10, 1, remove_list=deaths, add_list=add_list, round=round)
+        working_file = generate_input(10, 1, add_list=add_list, round=round)
 
         # input round number below
         inpt,nnds = generate_graph(working_file, round)
         
         # run round
-        os.system("cat %s %s | python3 -m kidney_solver.kidney_solver 3 100 %s"
-         %( inpt, nnds,"picef"))
+        os.system("cat %s %s | python3 -m kidney_solver.kidney_solver 50 50 %s"
+         %( inpt, nnds,"uef"))
         
         # cycles, chains = kidney_solver.run_round(i)
         cycles, chains = check_cycles_chains()
-        cycles = [(round + wait_time, c) for c in cycles]
-        chains = [(round + wait_time, c) for c in chains]
 
-        awaiting_operations["cycles"].append(cycles)
-        awaiting_operations["chains"].append(chains)
+        # update operations data according to optimal cycles/chains
+        for c in cycles:
+            operations["cycles"][c] = round + wait_time
+            operations["people_waiting"].update(set(c))
+            active.difference_update(set(c))
+            
+        for c in chains:
+            operations["chains"][c] = round + wait_time
+            operations["people_waiting"].update(set(c))
+            active.difference_update(set(c))
 
-        # add success
-        history.add_round(cycles, chains, awaiting_operations, deaths, successful, unsuccessful, active_pairs)
+        # remove people waiting for an operation from the active set
+        active.difference_update(operations["people_waiting"])
+            
+        # add history
+        history.add_round(cycles, chains, operations, deaths, successful, unsuccessful, active)
 
     print("Total Transplants: " + str(transplants))
     print("Total Deaths: " + str(total_deaths))
+    print("Successful Transplants: ", history.successful)
     print("Failed Transplants: ",history.unsuccessful)
 
         
