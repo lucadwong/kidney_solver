@@ -235,7 +235,7 @@ def generate_graph(input_file, round):
     return f'graphs/graph{round}.input', f'graphs/graph{round}.ndds'
 
 # def generate_input(add_num, altru_num, add_list=[], round=0, count=0, people={}, p_die_mu=0.3, p_die_sd=0.15, p_die_update = 1.1):
-def generate_input(add_num, altru_num, add_list=[], round=0, p_die_mu=0.01, p_die_sd=0.005, p_die_update = 1.01):
+def generate_input(add_num, altru_num, add_list=[], round=0, p_die_mu=0.02, p_die_sd=0.005, p_die_update = 1.01):
     global people
     global count
     global active
@@ -334,11 +334,13 @@ if __name__=="__main__":
     transplants = 0
     total_deaths = 0
     
-    num_rounds = 48
+    num_rounds = 30
     for round in range(num_rounds):
         
         # iterate through groups waiting operations to check for failures
         successful, unsuccessful = check_waiting_operations(round)
+
+        alive.difference_update(successful)
         
         # finds deaths
         deaths = check_deaths()
