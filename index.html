@@ -7,12 +7,17 @@
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="css/styles.css">
-
     <!-- JS Libraries -->
     <script src="https://unpkg.com/scrollreveal"></script>
     <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script>
+        window.onload = function() {
+            node(1);
+        };
+    </script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/styles.css">
 
     <!-- Header -->
     <title>Kidney Matching</title>
@@ -21,14 +26,28 @@
 <body>
     <div id="particles-js"></div>    
     <div id="content">
-        <div class="container-fluid center" style="height: 95%; width: 100%">
-            <div class="row center" style="width:100%; height: 100%">
+        <div class="container-fluid" style="height: 95%; width: 100%">
+            <p style='float:left'>Best viewed on a large screen.</p>
+            <div class='btn-group' role='group' style='float: right; height: 5%;' id='footer'>
+                <button id='slide1' type='button' class='btn nav btn-sm' onclick="section('1'); node(1)" style="color:grey">1</button>
+                <button id='slide2' type='button' class='btn nav btn-sm' onclick="section('2');">2</button>
+                <button id='slide3' type='button' class='btn nav btn-sm' onclick="section('3');">3</button>
+                <button id='slide4' type='button' class='btn nav btn-sm' onclick="section('4'); node(4)">4</button>
+                <button id='slide5' type='button' class='btn nav btn-sm' onclick="section('5'); line('./line_graph/5.csv', 'Round #')">5</button>
+                <button id='slide6' type='button' class='btn nav btn-sm' onclick="section('6'); line('./line_graph/6.csv', 'P(Failure)')">6</button>
+                <button id='slide7' type='button' class='btn nav btn-sm' onclick="section('7'); line('./line_graph/7.csv', 'P(Death)')">7</button>
+                <button id='slide8' type='button' class='btn nav btn-sm' onclick="section('8')">8</button>
+                <button id='slide9' type='button' class='btn nav btn-sm' onclick="section('9')">9</button>
+            </div> 
+            <br/><br/>
+            <div class="row center" style="width:100%; height: 95%">
                 <div class="col-6">
                     <div style="width: 100%">
                         <h4 id="title">Evaluating Different Prioritization Schemes in Kidney Matching: <br/> Who, When, and How?</h4>
                         <hr/>
                         <h6 id="subtitle">Luca D'Amico-Wong, Jennifer Liang, <br/> Phyllis Zhang</h6> 
-                        <div id="left"></div> 
+                        <div id="left"></div>
+                        <br/><br/>
                     </div>              
                 </div>
                 <div class="col-6" style="width: 50%; height: 100%">
@@ -39,24 +58,9 @@
             <br/>
             <br/>
         </div>
-        <div class='btn-group' role='group' style='float: right; height: 5%;' id='footer'>
-            <button id='slide1' type='button' class='btn nav btn-sm' onclick="section('1'); node(1)" style="color:grey">1</button>
-            <button id='slide2' type='button' class='btn nav btn-sm' onclick="section('2');">2</button>
-            <button id='slide3' type='button' class='btn nav btn-sm' onclick="section('3')">3</button>
-            <button id='slide4' type='button' class='btn nav btn-sm' onclick="section('4')">4</button>
-            <button id='slide5' type='button' class='btn nav btn-sm' onclick="section('5'); line('./line_graph/example.csv')">5</button>
-            <button id='slide6' type='button' class='btn nav btn-sm' onclick="section('6')">6</button>
-            <button id='slide7' type='button' class='btn nav btn-sm' onclick="section('7')">7</button>
-            <button id='slide8' type='button' class='btn nav btn-sm' onclick="section('8')">8</button>
-            <button id='slide9' type='button' class='btn nav btn-sm' onclick="section('9')">9</button>
-            <button id='slide10' type='button' class='btn nav btn-sm' onclick="section('10')">10</button>
-        </div>
+        
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/tsparticles@1.9.2/dist/tsparticles.min.js" integrity="sha256-5kED68Spy7K2CEbfu4CjV92DmZR5ZQFUoIR5qmPzZWg=" crossorigin="anonymous"></script>
     <script src="js/main.js"></script>
-    <script>
-        node(1);
-    </script>
 </body>
 </html> 
