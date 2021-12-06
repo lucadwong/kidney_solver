@@ -150,7 +150,7 @@ function section(n){
 
     var n = parseInt(n);
     var array = [];
-    for (let i = 1; i <= 10; i++){
+    for (let i = 1; i <= 9; i++){
         if (i == n){
             document.getElementById('slide' + n).style.color = 'grey';
         }
@@ -168,59 +168,85 @@ function section(n){
         "right": ""
       })
     content.push({
-        "title": "Introduction",
+        "title": "Introduction, Code, & Write-up",
         "subtitle": "",
-        "left": "Matching algorithms play an important role in the setting of kidney-paired donation, in which participants are patient-donor pairs who look to participate in chains and cycles to donate and receive kidneys. In the course, we've discussed the maximum cardinality matching approach, which provides a Pareto dominant matching. While in theory, this would maximize the possible number of transplants at a given time of the model (under the assumption that matches will result in transplants), there arise a number of complications with this design in practice. In particular, this simple model does not consider the dynamic nature of the system; patients and donors are continuously joining and leaving the system. It also fails to take into consideration the probability that matches may fail to result in transplants; with close to 93\% of all proposed algorithmic matches failing, this is an extremely real and extremely important concern.",
-        "right": "right"
+        "left": "<p>Matching algorithms play an important role in the setting of kidney-paired donation, in which participants are patient-donor pairs who look to participate in chains and cycles to donate and receive kidneys. In the course, we've discussed the maximum cardinality matching approach, which provides a Pareto dominant matching. While in theory, this would maximize the possible number of transplants at a given time of the model (under the assumption that matches will result in transplants), there arise a number of complications with this design in practice. In particular, this simple model does not consider the dynamic nature of the system; patients and donors are continuously joining and leaving the system. It also fails to take into consideration the probability that matches may fail to result in transplants; with close to 93\% of all proposed algorithmic matches failing, this is an extremely real and extremely important concern.</p>",
+        "right": "<h6>Code</h6><hr/><p>You can find our GitHub repository here. We modified James Trimble's original Kidney-Solver repository to accommodate for dynamic, multi-round simulations with agents entering and exiting the exchange over time.</p><a href='https://github.com/lucadwong/kidney_solver'><button type='button' class='btn btn-outline-primary'>GitHub Repository</button></a><br/><br/><br/><br/><h6>Write-up</h6><hr/><p>You can download and read our write-up, far more detailed than this website, here. </p><a href='./writeup.pdf' download='writeup.pdf'><button type='button' class='btn btn-outline-primary'>Write-up</button></a>"
     })
+
+    var left_theory = ""
+    left_theory += "<p>While failure-aware matching maximizes the expected number of matches conditional on the risk of a transplant failing, this might not be the most important goal for a kidney exchange. If we consider the purpose of a kidney exchange to be to save lives through kidney transplants, our objective function would attempt to minimize the expected number of deaths in the network, or in other words, to maximize the expected number of lives saved by the exchange. This is the motivation behind our FRLA matching algorithm.</p>"
+    left_theory += "<p>In practice, FRLA maximizes the expected number of lives saved by successful transplants. It achieves this goal by weighting each edge in our compatibility graph by the probability that the patient receiving the transplant (the patient on the terminal node of the edge). FRLA then maximizes the expected sum of the weights, or the expected sum of the death probabilities, of those who successfully receive a kidney transplant. Assuming that doctors/specialists have a good idea as to the condition of their patients, we likely have a good idea of these death probabilities for each patient.</p>"
+
+    var right_theory = "<h6 style='text-align:left'>We will look at four algorithms in particular.</h6><br/><ul style='text-align:left'><li><p>Unextended edge formulation (UEF): This is the unextended edge formulation for the kidney matching problem, placing no restrictions on chain or cycle length.</p></li><li><p>Position-indexed chain-edge formulation (PICEF): This is the position-indexed chain-edge formulation, a formulation developed to allow for more compact representations of chains in the model. We cap cycle length at 3 and chain length at 20.</p></li><li><p>Failure-robust PICEF (FR-PICEF): This is a failure-robust/failure-aware implementation of PICEF a-la Dickerson et al. and explained in Section 2.</p></li><li><p>Failure-robust and longevity aware PICEF (FRLA): A modified version of PICEF, weights each edge according to the probability the patient dies on the terminal node dies in the current round.</p></li></ul>"
+
     content.push({
-        "title": "Evaluating Different Prioritization Schemes in Kidney Matching: <br/> Who, When, and How?",
-        "subtitle": "Luca D'Amico-Wong, Jennifer Liang, <br/> Phyllis Zhang",
-        "left": "",
+        "title": "Theory",
+        "subtitle": "In this section, we present our failure-robust longevity-aware (FRLA) algorithm to minimize the expected number of deaths in our network.",
+        "left": left_theory,
+        "right": right_theory
+    })
+
+    var left_setup = ""
+    left_setup += "<ol><li><p>Patient/Donor Generation: We generated our patient donor pairs following the general American blood type distribution, with few modifications for incompatibilities. 7 pairs were generated per round with expected 0.7 altruistic donors, reflecting the small number of altruistic donors while still allowing for a meaningful presence.</p></li>"
+    left_setup += "<li><p>Death Probability Generation: For each pair, the patient is given a probability of dying in the current round via a modified Normal distribution. The death probability increases each year.</p></li>"
+    left_setup += "<li><p>Failed Match Probabilities: For each edge, we assign a constant probability of failure, taken from Dickerson et al. </p></li>"
+    left_setup += "<li><p>Compatibility Graph Generation and Matching: Our simulation runs in rounds. New agents are generated every round, and agents are removed when they die or receive a successful transplant. </p></li></ol>"
+
+    var keys = "<ul style='text-align:left'><li><p>UEF: Unextended edge formulation</p></li><li><p>PICEF: position-indexed chain-edge formulation</p></li><li><p>FR-PICEF: failure-robust PICEF</p></li><li><p>FRLA: failure-robust and longevity aware PICEF</p></li></ul>"
+    content.push({
+        "title": "Simulation Setup",
+        "subtitle": "All code can be found in our <a style='color: white' href='https://lucadwong.github.io/kidney_solver'>GitHub</a>, modified from James Trimble's original repository.",
+        "left": left_setup,
         "right": ""
     })
+
+    var left_rounds = keys;
+    left_rounds += "<p>Note that UEF has the worst performance, completing only 20 transplants and saving 10 lives over 48 rounds compared to the 160 and 60 of FRLA. UEF struggles in this failure-aware environment precisely because of the unrestricted nature of its formulation – long cycles and chains are much more likely to fail than typical 2-cycles. </p>"
+    left_rounds += "<p>Both failure-aware algorithms perform better than their failure-ignorant counterparts, resulting in more transplants, fewer deaths, and more lives saved. FRLA clearly outperforms failure-aware PICEF in deaths and lives saved but does not result in significantly more transplants, a result of the difference between the two objective functions.</p>"
+
     content.push({
-        "title": "Evaluating Different Prioritization Schemes in Kidney Matching: <br/> Who, When, and How?",
-        "subtitle": "Luca D'Amico-Wong, Jennifer Liang, <br/> Phyllis Zhang",
-        "left": "4",
-        "right": "Right Content"
+        "title": "Simulation: Varying # of Rounds",
+        "subtitle": "",
+        "left": left_rounds,
+        "right": "<select class='form-control' id='select-form'><option value='1'>Transplants (Select Metric)</option><option value='2'>Deaths</option><option value='3'>Lives Saved</option></select><br/>"
+    })
+
+    var left_failure = keys;
+    left_failure += "<p>In this experiment, we vary the uniform failure probability associated with each edge – we change how likely any given transplant is to fail. FRLA continues to outperform PICEF and failure-aware PICEF in terms of the lives saved and number of deaths. These advantages are most drastic when the failure rate is between 0.5 and 0.7. Additionally, note that Dickerson et al. estimate the probability of a positive crossmatch to be around 0.7.</p>"
+    left_failure += "<p>With lower failure rates of 0.3 and 0.5, FRLA completes fewer total transplants. This represents the implicit trade-off FRLA makes when determining optimal cycles/chains– FRLA prefers fewer total transplants so long as it picks high-value transplants expected to save more lives. </p>"
+    content.push({
+        "title": "Simulation: Varying P(Failure)",
+        "subtitle": "",
+        "left": left_failure,
+        "right": "<select class='form-control' id='select-form'><option value='1'>Transplants (Select Metric)</option><option value='2'>Deaths</option><option value='3'>Lives Saved</option></select><br/>"
+    })
+
+    var left_death = keys;
+    left_death += "<p>Higher initial probabilities of death will lead to FRLA more clearly outperforming the other algorithms in terms of the number of lives saved and total number of deaths. With an initial N(0.01, 0.01) distribution, differences between the non-UEF algorithms are negligible, but at an initial N(0.04, 0.04) distribution, FRLA dramatically outperforms its two PICEF counterparts, an increase of 25% in saved lives, with fewer deaths.</p>";
+    left_death += "<p>With a larger variance in death probabilities, FRLA is able to more clearly pick out the patients who are in severe need of a kidney, prioritizing them for transplants. So, if we expect large variances among the severity of patients' conditions in the real world, FRLA can provide meaningful advantages over other algorithms.</p>"
+    content.push({
+        "title": "Simulation: Varying P(Death)",
+        "subtitle": "",
+        "left": left_death,
+        "right": "<select class='form-control' id='select-form'><option value='1'>Transplants (Select Metric)</option><option value='2'>Deaths</option><option value='3'>Lives Saved</option></select><br/>"
+    })
+
+    var left_conclusions = "<p>FRLA is designed to approach kidney matching with the goal of minimizing the number of deaths in the network, in contrast to the typical objective of maximizing the total number of transplants. It does so by maximizing the number of expected deaths prevented through transplants, allowing patients more likely to die to receive kidneys sooner. The theoretical properties of FRLA are examined, and FRLA is designed precisely to achieve this goal.</p>"
+    left_conclusions += "<p>We find that simulations support the theory behind FRLA, suggesting that there are meaningful benefits to implementing FRLA, with more lives saved and fewer deaths reported in the exchange. The benefits of FRLA increase as the distribution of death probabilities among patients in the exchange becomes wider, representing more variance in the severity of the patients' conditions. Additionally, longer simulations result in larger benefits to implementing FRLA. Higher failure probabilities have little effect on FRLA's relative performance, though we do see deterioration among all four tested algorithms at sufficiently high rates of failure.</p>"
+    left_conclusions += "<p>As one would expect from its design, FRLA does not result in significantly more transplants than failure-aware matching or capped PICEF matching, and there are times when fewer total transplants are recorded – dependent on the priorities of the exchange, this could be a concern associated with implementing FRLA.</p>"
+    content.push({
+        "title": "Conclusions & Future Work",
+        "subtitle": "",
+        "left": left_conclusions,
+        "right": "<p style='text-align:left'>While the initial results of FRLA are promising, there are a few questions we may seek to answer next.</p><ol style='text-align:left'><li><p>What happens when we introduce non-uniform edge failure probabilities? What if failure and death probabilities are correlated, as one might expect with especially weak patients who might struggle to receive a kidney?</p></li><li><p>Is the FRLA algorithm ethical? Should we prioritize those with high probabilities of dying over those who have been in the exchange for much longer?</p></li><li><p>Extending the work of previous literature, how does the FRLA algorithm compare to others in terms of expected wait time?</p></li><li><p>How do myopic and static matching compare under the FRLA algorithm? Is it possible that matching intermittently rather than every round yields fewer deaths and more saved lives? </p></li></ol>"
     })
     content.push({
-        "title": "Evaluating Different Prioritization Schemes in Kidney Matching: <br/> Who, When, and How?",
-        "subtitle": "Luca D'Amico-Wong, Jennifer Liang, <br/> Phyllis Zhang",
-        "left": "5",
-        "right": "<select class='form-control' id='select-form'><option value='1'>Metric 1</option><option value='2'>Metric 2</option><option value='3'>Metric 3</option></select><br/>"
-    })
-    content.push({
-        "title": "Evaluating Different Prioritization Schemes in Kidney Matching: <br/> Who, When, and How?",
-        "subtitle": "Luca D'Amico-Wong, Jennifer Liang, <br/> Phyllis Zhang",
-        "left": "6",
-        "right": "Right Content"
-    })
-    content.push({
-        "title": "Evaluating Different Prioritization Schemes in Kidney Matching: <br/> Who, When, and How?",
-        "subtitle": "Luca D'Amico-Wong, Jennifer Liang, <br/> Phyllis Zhang",
-        "left": "7",
-        "right": "Right Content"
-    })
-    content.push({
-        "title": "Evaluating Different Prioritization Schemes in Kidney Matching: <br/> Who, When, and How?",
-        "subtitle": "Luca D'Amico-Wong, Jennifer Liang, <br/> Phyllis Zhang",
-        "left": "8",
-        "right": "Right Content"
-    })
-    content.push({
-        "title": "Evaluating Different Prioritization Schemes in Kidney Matching: <br/> Who, When, and How?",
-        "subtitle": "Luca D'Amico-Wong, Jennifer Liang, <br/> Phyllis Zhang",
-        "left": "9",
-        "right": "Right Content"
-    })
-    content.push({
-        "title": "Evaluating Different Prioritization Schemes in Kidney Matching: <br/> Who, When, and How?",
-        "subtitle": "Luca D'Amico-Wong, Jennifer Liang, <br/> Phyllis Zhang",
-        "left": "",
-        "right": "<div class='row'><div class='col-6'><img src='./img/luca.png' style='w: 70%; float: right'></div><div class='col-6'><img src='./img/jennifer.jpg' style='w: 70%';></div></div><br/><div class='row'><div class='col-12'><img src='./img/phyllis.jpg' style='w: 35%'></div></div>"
-    })
+      "title": "Evaluating Different Prioritization Schemes in Kidney Matching: <br/> Who, When, and How?",
+      "subtitle": "Luca D'Amico-Wong, Jennifer Liang, <br/> Phyllis Zhang",
+      "left": "",
+      "right": "<div class='row' style='height:50%'><div class='col-6'><br/><br/><img src='./img/luca.png' style='width: 70%; float: right'></div><div class='col-6'><br/><br/><img src='./img/jennifer.jpg' style='width: 70%';></div></div><br/><div class='row'><div class='col-12'><img src='./img/phyllis.jpg' style='width: 35%'></div></div>"
+  })
 
 
     document.getElementById('title').innerHTML = content[n-1]["title"];
@@ -234,7 +260,7 @@ function node(n){
   var h = document.getElementById('right').clientHeight;
   var w = document.getElementById('right').clientWidth;
 
-  var linkDistance=200;
+  var linkDistance=150;
 
   var colors = d3.scale.category10();
 
@@ -278,7 +304,59 @@ function node(n){
       "vertices_add": [3],
       "vertices_remove": [4],
       "edges_add": [2, 4, 5, 6, 7],
-      "edges_remove": [8]
+      "edges_remove": [8],
+      "remove_message": "Removing Patient | Donor Pair",
+      "add_message": "Adding Patient | Donor Pairs",
+      "standard_message": "Patient | Donor"
+    }
+  }
+
+  if (n == 4){
+    dataset["nodes"] = [{name: "Altruist: AB"}, {name: "AB | O | 0.04"}, {name: "B | A | 0.023"}, {name: "A | B | 0.05"}, {name: "B | O | 0.012"}, {name: "B | A | 0.025"},]
+    dataset["edges"] = [
+      {source: 0, target: 1},
+      {source: 1, target: 2},
+      {source: 1, target: 3},
+      {source: 1, target: 4},
+      {source: 1, target: 5},
+      {source: 2, target: 1},
+      {source: 2, target: 3},
+      {source: 3, target: 1},
+      {source: 3, target: 2},
+      {source: 3, target: 4},
+      {source: 3, target: 5},
+      {source: 4, target: 1},
+      {source: 4, target: 2},
+      {source: 4, target: 3},
+      {source: 4, target: 5},
+      {source: 5, target: 1},
+      {source: 5, target: 3}
+    ]
+
+    highlights = [];
+    highlights.push({
+      "vertices": [0, 1, 2, 3, 5],
+      "edges": [0, [1, 5], [6, 8], [10, 16]],
+    });
+    highlights.push({
+      "vertices": [],
+      "edges": [],
+    });
+    highlights.push({
+      "vertices": [3, 4, 5, 3],
+      "edges": [[9, 13], 14, [16, 10]]
+    });
+
+    highlights_data = {
+      "add_round": 2,
+      "remove_round": 1,
+      "vertices_add": [4],
+      "vertices_remove": [0, 1],
+      "edges_add": [3, 9, 11, 12, 13, 14],
+      "edges_remove": [0, 1, 2, 3, 4, 5, 7, 11, 15],
+      "remove_message": "2nd edge fails. Altruist & AB | O complete transplant and leave.",
+      "add_message": "Patient B | O joins the exchange.",
+      "standard_message": "Patient | Donor | P(Death)"
     }
   }
 
@@ -292,7 +370,8 @@ function node(n){
   var text = svg.append("text")
     .attr("y", h * 0.075)
     .attr("x", w * 0.05)
-    .text("Patient | Donor");
+    .text(highlights_data["standard_message"])
+    .style("font-size", "13px");
 
   var force = d3.layout.force()
       .nodes(dataset.nodes)
@@ -367,7 +446,7 @@ function node(n){
 
   });
 
-  let counter = 0;
+  let counter = -1;
   var highlight_vertices = [];
   var highlight_edges = [];
 
@@ -391,6 +470,7 @@ function node(n){
   for (let iter = 0; iter < 3; iter++){
 
     if (iter != 0){
+
       for (let j = 0; j < highlights_data["vertices_add"].length; j++){
         d3.select("#vertex" + highlights_data["vertices_add"][j])
         .transition().duration(1000)
@@ -410,16 +490,19 @@ function node(n){
         .attr('marker-end', null)
         .delay(counter * 1000 + 3000);
       }
+      counter += 2;
+
     }
     
     for (let i = 0; i < highlights.length; i++){
 
       // adding vertices in 
+      
       if (i == highlights_data["add_round"]){
         
         text
         .transition().duration(1000)
-        .text("Adding Patient | Donor Pairs")
+        .text(highlights_data["add_message"])
         .delay(counter * 1000);
 
         for (let j = 0; j < highlights_data["vertices_add"].length; j++){
@@ -442,16 +525,38 @@ function node(n){
           .delay(counter * 1000 + 3000);
         }
 
+        if (i > highlights_data["remove_round"])
+        {
+          for (let j = 0; j < highlights_data["vertices_remove"].length; j++){
+            d3.select("#vertex" + highlights_data["vertices_remove"][j])
+            .transition().duration(1000)
+            .style("fill-opacity", "0")
+            .delay(counter * 1000 + 3000);
+  
+            d3.select("#nodelabel" + highlights_data["vertices_remove"][j])
+            .transition().duration(1000)
+            .attr('opacity', 0)
+            .delay(counter * 1000 + 3000);
+  
+          }
+          for (let j = 0; j < highlights_data["edges_remove"].length; j++){
+            d3.select("#edge" + highlights_data["edges_remove"][j])
+            .transition().duration(1000)
+            .style("stroke-opacity", 0)
+            .attr('marker-end', null)
+            .delay(counter * 1000 + 3000);
+          }
+        }
+
         counter++;
       }
-
 
       // removing vertices
       else if (i == highlights_data["remove_round"]){
 
         text
         .transition().duration(1000)
-        .text("Removing Patient | Donor Pair")
+        .text(highlights_data["remove_message"])
         .delay(counter * 1000 + 1000);
 
         for (let j = 0; j < highlights_data["vertices_remove"].length; j++){
@@ -479,8 +584,10 @@ function node(n){
       else {
         text
         .transition().duration(1000)
-        .text("Patient | Donor")
+        .text(highlights_data["standard_message"])
         .delay(counter * 1000 + 3000);
+
+        counter++;
       }
 
       highlight_vertices = highlights[i]["vertices"];
@@ -513,6 +620,7 @@ function node(n){
           .style("stroke-width", 1.5)
           .delay(counter * 1000 + 3000);  
         }
+
         counter++;
 
       }
@@ -544,29 +652,108 @@ function node(n){
       .attr('marker-end','url(#arrowhead)')
       .delay(counter * 1000 + 3000);  
 
+      if (i >= highlights_data["remove_round"])
+      {
+        for (let j = 0; j < highlights_data["vertices_remove"].length; j++){
+          d3.select("#vertex" + highlights_data["vertices_remove"][j])
+          .transition().duration(1000)
+          .style("fill-opacity", "0")
+          .delay(counter * 1000 + 3000);
+
+          d3.select("#nodelabel" + highlights_data["vertices_remove"][j])
+          .transition().duration(1000)
+          .attr('opacity', 0)
+          .delay(counter * 1000 + 3000);
+
+        }
+        for (let j = 0; j < highlights_data["edges_remove"].length; j++){
+          d3.select("#edge" + highlights_data["edges_remove"][j])
+          .transition().duration(1000)
+          .style("stroke-opacity", 0)
+          .attr('marker-end', null)
+          .delay(counter * 1000 + 3000);
+        }
+      }
+
+      if (i < highlights_data["add_round"])
+      {
+        for (let j = 0; j < highlights_data["vertices_add"].length; j++){
+          
+          d3.select("#vertex" + highlights_data["vertices_add"][j])
+          .transition().duration(1000)
+          .style("fill-opacity", 0)
+          .delay(counter * 1000 + 3000);
+
+          d3.select("#nodelabel" + highlights_data["vertices_add"][j])
+          .transition().duration(1000)
+          .attr('opacity', 0)
+          .delay(counter * 1000 + 3000);
+        }
+        for (let j = 0; j < highlights_data["edges_add"].length; j++){
+          d3.select("#edge" + highlights_data["edges_add"][j])
+          .transition().duration(1000)
+          .style("stroke-opacity", 0)
+          .attr('marker-end','none')
+          .delay(counter * 1000 + 3000);
+        }
+      }
+
       counter += 2;
 
     }
+    nodes
+    .transition().duration(1000)
+    .style("fill", "grey")
+    .style("fill-opacity", 1)
+    .delay(counter * 1000 + 3000);  
+
+    nodelabels
+    .transition().duration(1000)
+    .attr('opacity', 1)
+    .delay(counter * 1000 + 3000);
+
+    edges
+    .transition().duration(1000)
+    .style("stroke","#ccc")
+    .style("stroke-width", 1)
+    .style("stroke-opacity", 1)
+    .attr('marker-end','url(#arrowhead)')
+    .delay(counter * 1000 + 3000); 
+
   }
   text
-        .transition().duration(1000)
-        .text("Patient | Donor")
-        .delay(counter * 1000 + 1000);
+    .transition().duration(1000)
+    .text(highlights_data["standard_message"])
+    .delay(counter * 1000 + 1000);
+
   nodes
     .transition().duration(2000)
     .style("fill",function(d,i){return colors.range()[i];})
-    .style("opacity", 1)
-    .delay(counter * 1000 + 3000);  
+    .style("fill-opacity", 1)
+    .delay(counter * 1000 + 3000); 
+    
+  nodelabels
+    .transition().duration(1000)
+    .attr('opacity', 1)
+    .delay(counter * 1000 + 3000);
+
+  edges
+    .transition().duration(1000)
+    .style("stroke","#ccc")
+    .style("stroke-width", 1)
+    .style("stroke-opacity", 1)
+    .attr('marker-end','url(#arrowhead)')
+    .delay(counter * 1000 + 3000); 
 }
-function line(path)
+function line(path, title)
 {
   d3.csv(path, function(d) { 
-    drawLine(d);
+    drawLine(d, title);
   });
 
 }
 
-function drawLine(d){
+function drawLine(d, title){
   var data = [];
 
   var selected = "1";
@@ -644,29 +831,17 @@ function drawLine(d){
     };
   });
 
-  var total_alg = color.domain().map(function(name) {
-    return {
-      name: name,
-      values: d.map(function(d) {
-        return {
-          x: d.x,
-          n: +d[name]
-        };
-      })
-    };
-  });
-
   x.domain(d3.extent(d, function(d) {
     return d.x;
   }));
 
-  y.domain([
-    d3.min(total_alg, function(c) {
+  var y_domain = y.domain([
+    d3.min(alg, function(c) {
       return d3.min(c.values, function(v) {
         return v.n;
       });
     }),
-    d3.max(total_alg, function(c) {
+    d3.max(alg, function(c) {
       return d3.max(c.values, function(v) {
         return v.n;
       });
@@ -704,12 +879,12 @@ function drawLine(d){
     .attr("transform", "translate(0," + height + ")")
     .call(xAxis)
     .append("text")
-    .attr("x", width + 40)
-    .attr("dy", "-0.31em")
+    .attr("x", width + 60)
+    .attr("font-weight", 900)
     .style("text-anchor", "end")
-    .text("Round #");;
+    .text(title);;
 
-  svg.append("g")
+  let y_axis = svg.append("g")
     .attr("class", "y axis")
     .call(yAxis)
     .append("text")
@@ -842,6 +1017,21 @@ function drawLine(d){
         })
       };
     });
+
+    y_domain.domain([
+      d3.min(alg, function(c) {
+        return d3.min(c.values, function(v) {
+          return v.n;
+        });
+      }),
+      d3.max(alg, function(c) {
+        return d3.max(c.values, function(v) {
+          return v.n;
+        });
+      })
+    ]);
+
+    svg.selectAll("g .y.axis").call(d3.svg.axis().scale(y).orient("left"));
 
     edit_path
     .data(alg)

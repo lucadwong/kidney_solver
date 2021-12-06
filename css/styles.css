@@ -60,13 +60,7 @@ body{
     text-align: center;
 }
 p{
-    font-size: 14px;
-}
-
-.center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    font-size: 13px;
 }
 
 .axis path,
@@ -80,4 +74,10 @@ p{
     fill: none;
     stroke: steelblue;
     stroke-width: 2px;
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
