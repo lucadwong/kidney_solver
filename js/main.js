@@ -209,7 +209,7 @@ function section(n){
         "title": "Simulation: Varying # of Rounds",
         "subtitle": "",
         "left": left_rounds,
-        "right": "<select class='form-control' id='select-form'><option value='1'>Transplants (Select Metric)</option><option value='2'>Deaths</option><option value='3'>Lives Saved</option></select><br/>"
+        "right": "<select class='form-control' id='select-form'><option value='1'>Transplants (Select Metric)</option><option value='2'>Deaths</option><option value='3'>Lives Saved</option></select><div style='float:right; font-size: 12px; margin-top:2; margin-bottom:2'>Mouse over the graph to view precise values.</div>"
     })
 
     var left_failure = keys;
@@ -219,7 +219,7 @@ function section(n){
         "title": "Simulation: Varying P(Failure)",
         "subtitle": "",
         "left": left_failure,
-        "right": "<select class='form-control' id='select-form'><option value='1'>Transplants (Select Metric)</option><option value='2'>Deaths</option><option value='3'>Lives Saved</option></select><br/>"
+        "right": "<select class='form-control' id='select-form'><option value='1'>Transplants (Select Metric)</option><option value='2'>Deaths</option><option value='3'>Lives Saved</option></select><div style='float:right; font-size: 12px; margin-top:2; margin-bottom:2'>Mouse over the graph to view precise values.</div>"
     })
 
     var left_death = keys;
@@ -229,7 +229,7 @@ function section(n){
         "title": "Simulation: Varying P(Death)",
         "subtitle": "",
         "left": left_death,
-        "right": "<select class='form-control' id='select-form'><option value='1'>Transplants (Select Metric)</option><option value='2'>Deaths</option><option value='3'>Lives Saved</option></select><br/>"
+        "right": "<select class='form-control' id='select-form'><option value='1'>Transplants (Select Metric)</option><option value='2'>Deaths</option><option value='3'>Lives Saved</option></select><div style='float:right; font-size: 12px; margin-top:2; margin-bottom:2'>Mouse over the graph to view precise values.</div>"
     })
 
     var left_conclusions = "<p>FRLA is designed to approach kidney matching with the goal of minimizing the number of deaths in the network, in contrast to the typical objective of maximizing the total number of transplants. It does so by maximizing the number of expected deaths prevented through transplants, allowing patients more likely to die to receive kidneys sooner. The theoretical properties of FRLA are examined, and FRLA is designed precisely to achieve this goal.</p>"
@@ -763,7 +763,7 @@ function drawLine(d, title){
       data.push(d[i])
     }
   }
-  var h = document.getElementById('right').clientHeight  * 0.87;
+  var h = document.getElementById('right').clientHeight  * 0.85;
   var w = document.getElementById('right').clientWidth;
 
   var margin = {
