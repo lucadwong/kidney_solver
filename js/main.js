@@ -196,7 +196,7 @@ function section(n){
     var keys = "<ul style='text-align:left'><li><p>UEF: Unextended edge formulation</p></li><li><p>PICEF: position-indexed chain-edge formulation</p></li><li><p>FR-PICEF: failure-robust PICEF</p></li><li><p>FRLA: failure-robust and longevity aware PICEF</p></li></ul>"
     content.push({
         "title": "Simulation Setup",
-        "subtitle": "All code can be found in our <a style='color: white' href='https://lucadwong.github.io/kidney_solver'>GitHub</a>, modified from James Trimble's original repository.",
+        "subtitle": "All code can be found in our <a style='color: white' href='https://github.com/lucadwong/kidney_solver'>GitHub</a>, modified from James Trimble's original repository.",
         "left": left_setup,
         "right": ""
     })
